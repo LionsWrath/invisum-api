@@ -10,5 +10,10 @@ urlpatterns = format_suffix_patterns([
 ])
 
 urlpatterns += [
+    # Searches
+    url(r'^search/users/(?P<username>.+)/$', views.DatasetByUser.as_view()),
+    url(r'^search/title/(?P<title>.+)/$', views.DatasetByName.as_view()), 
+    
+    # Change this to follow MEDIA_URL
     url(r'^media/(?P<pk>[0-9]+)/$', views.DatasetServe.as_view()),
 ]

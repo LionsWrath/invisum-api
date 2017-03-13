@@ -1,3 +1,3 @@
-INVisum_API
+invisum-api
 
 API for the In Visum service.
