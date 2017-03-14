@@ -31,6 +31,9 @@ install:
 
     #- pip install -r requirements.txt
     - pip install -q Django==$DJANGO_VERSION
+    - pip install -q djangorestframework
+    - pip install -q markdown
+    - pip install -q django-filter
 
 before_script:
     - mysql -e 'CREATE DATABASE IF NOT EXISTS travisdb;'
