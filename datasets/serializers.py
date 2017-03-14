@@ -7,7 +7,7 @@ class DatasetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Dataset
-        fields = ('id', 'title', 'data', 'owner')
+        fields = ('id', 'title', 'data', 'extension', 'owner')
 
 class UserSerializer(serializers.ModelSerializer):
     datasets = serializers.PrimaryKeyRelatedField(many=True, queryset=Dataset.objects.all())
