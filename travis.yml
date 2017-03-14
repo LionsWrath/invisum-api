@@ -1,0 +1,45 @@
+language: python
+
+python:
+    - 2.6
+    - 2.7
+
+services: 
+    - mysql
+
+env:
+    global:
+        - DJANGO_VERSION=1.10.6
+        - DJANGO_SETTINGS_MODULE=invisum.settings
+        - PYTHONPATH=$HOME/builds/LionsWrath/invisum-api
+        - PIP_USE_MIRRORS=true
+
+install:
+    - sudo apt-get update
+    - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    
+    # Useful for debugging any issues with conda
+    - conda info -a
+
+    - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION anaconda
+    - source activate test-environment
+
+    #- pip install -r requirements.txt
+    - pip install -q Django==$DJANGO_VERSION
+
+before_script:
+    - mysql -e 'CREATE DATABASE IF NOT EXISTS travisdb;'
+
+script:
+    - python manage.py makemigrations datasets
+    - python manage.py migrate 
+
+notifications:
+    email:
+        on_success: change
+        on_failure: always
