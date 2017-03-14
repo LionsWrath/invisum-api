@@ -4,10 +4,20 @@ from datasets.serializers import UserSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import permissions
+from os import path
+
+# Sent the 10 best ranked datasets
+class DiscoverFeed(generics.ListAPIView):
+    serializer_class = DatasetSerializer
+
+    def get_queryset(self):
+        dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating)
+        return dataframes[:10] 
 
 # Search a Dataset by title (case insensitive)
 class DatasetByName(generics.ListAPIView):
@@ -26,8 +36,19 @@ class DatasetByUser(generics.ListAPIView):
         return Dataset.objects.filter(owner__username__icontains=username)
 
 
-# Downloadable files for logged users
-class DatasetServe(APIView):
+# Downloadable files for logged users by filename
+class DatasetServeByFilename(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, filename):
+        response = Response(content_type='application/force-download')
+        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
+        response['X-Sendfile'] = smart_str(path.join(settings.MEDIA_ROOT, filename))
+        
+        return response
+
+# Downloadable files for logged users by dataset id
+class DatasetServeById(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, pk):
