@@ -14,6 +14,7 @@ from os import path
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
     serializer_class = DatasetSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating)
