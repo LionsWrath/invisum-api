@@ -79,7 +79,7 @@ if 'TRAVIS' in os.environ:
         'default': {
             'ENGINE':   'django.db.backends.mysql',
             'NAME':     'travisdb',
-            'USER':     'mysql',
+            'USER':     'travis',
             'PASSWORD': '',
             'HOST':     'localhost',
             'PORT':     '',
