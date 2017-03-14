@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.conf import settings
-from datasets.choices import EXTENSION_CHOICES
+from datasets.choices import EXTENSION_CHOICES, STAR_CONVERSION
+from django.db.models import Avg
+from django.db.models.functions import Coalesce
 from os import path
 import pandas as pd
 import json
@@ -15,17 +17,21 @@ def update_filename(instance, filename):
                                 date, 
                                 instance.get_extension_display().lower()) 
 
+    
+# Encoding of the files may be a future problem
+# Need reconfigurable fields for each type of file
 class Dataset(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
 
-    # For media
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
     extension = models.CharField(choices=EXTENSION_CHOICES, default='CSV', max_length=20)
-    
-    #Encoding may be a problem
 
-    #Rating
+    # Check if this is serializable
+    @property
+    def rating(self): 
+        return Rating.objects.filter(dataset__id=self.id).aggregate(average=Coalesce(Avg('value'),0))
+    
     #Owner
     owner = models.ForeignKey('auth.User', related_name='datasets', on_delete=models.CASCADE)
     
@@ -63,4 +69,8 @@ class Dataset(models.Model):
     class Meta:
         ordering = ('created',)
 
+class Rating(models.Model):
+    owner = models.ForeignKey('auth.User', related_name='ratings', on_delete=models.CASCADE) 
+    dataset = models.ForeignKey(Dataset, related_name='ratings', on_delete=models.CASCADE)
 
+    value = models.PositiveSmallIntegerField(choices=STAR_CONVERSION)

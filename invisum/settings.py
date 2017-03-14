@@ -83,6 +83,7 @@ if 'TRAVIS' in os.environ:
             'PASSWORD': '',
             'HOST':     'localhost',
             'PORT':     '',
+            'sql_mode': 'traditional',
         }
     }
 else:

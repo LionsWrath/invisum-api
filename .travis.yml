@@ -1,7 +1,6 @@
 language: python
 
 python:
-    - 2.6
     - 2.7
 
 services: 
@@ -10,6 +9,8 @@ services:
 env:
     global:
         - DJANGO_VERSION=1.10.6
+        - DRF_VERSION=3.5.4
+        - DJANGO_FILTER_VERSION=1.0.1
         - DJANGO_SETTINGS_MODULE=invisum.settings
         - PYTHONPATH=$HOME/builds/LionsWrath/invisum-api
         - PIP_USE_MIRRORS=true
@@ -29,11 +30,12 @@ install:
     - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION anaconda
     - source activate test-environment
 
+    # Create a requirement file later
     #- pip install -r requirements.txt
     - pip install -q Django==$DJANGO_VERSION
-    - pip install -q djangorestframework
+    - pip install -q djangorestframework==$DRF_VERSION
     - pip install -q markdown
-    - pip install -q django-filter
+    - pip install -q django-filter==$DJANGO_FILTER_VERSION
     - pip install -q mysql-python
 
 before_script:
