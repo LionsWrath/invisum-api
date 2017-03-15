@@ -1,6 +1,7 @@
 from datasets.models import Dataset
 from datasets.serializers import DatasetSerializer
 from datasets.serializers import UserSerializer
+from datasets.serializers import RatingSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
@@ -77,6 +78,7 @@ class DatasetDetail(generics.RetrieveUpdateDestroyAPIView):
 
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
+# Create a ViewSet for the user later
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -84,3 +86,15 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+#Testing the CurrentUserDefault
+class RatingCreate(generics.CreateAPIView):
+    queryset = Dataset.objects.all()
+    serializer_class = RatingSerializer
+
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+
+    # Associate the user and the dataset to the rating
+    def perform_create(self, serializer):
+        dataset = Dataset.objects.get(pk=self.kwargs['pk'])
+        serializer.save(dataset=dataset)

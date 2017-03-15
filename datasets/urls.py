@@ -11,7 +11,8 @@ urlpatterns = format_suffix_patterns([
     url(r'^users/$', views.UserList.as_view()),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
 
-    # Rating - make the views
+    # Rating - double check the urls
+    url(r'^datasets/rate/(?P<pk>[0-9]+)/$', views.RatingCreate.as_view()),
 
     # Searches - double check this after
     url(r'^search/users/(?P<username>.+)/$', views.DatasetByUser.as_view()),

@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.conf import settings
-from datasets.choices import EXTENSION_CHOICES, STAR_CONVERSION
 from django.db.models import Avg
 from django.db.models.functions import Coalesce
+from datasets.choices import EXTENSION_CHOICES, STAR_CONVERSION
 from os import path
 import pandas as pd
 import json
@@ -17,9 +17,9 @@ def update_filename(instance, filename):
                                 date, 
                                 instance.get_extension_display().lower()) 
 
-    
 # Encoding of the files may be a future problem
 # Need reconfigurable fields for each type of file
+# Need validators
 class Dataset(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
@@ -74,3 +74,7 @@ class Rating(models.Model):
     dataset = models.ForeignKey(Dataset, related_name='ratings', on_delete=models.CASCADE)
 
     value = models.PositiveSmallIntegerField(choices=STAR_CONVERSION)
+
+    class Meta:
+        ordering = ('dataset',)
+        unique_together = (('owner', 'dataset'),)

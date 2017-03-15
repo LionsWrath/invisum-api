@@ -72,9 +72,7 @@ Makefile.in
 .ycm_extra_conf.pyc
 
 ### PYTHON ###
-*.pyc
-datasets/*.pyc
-invisum/*.pyc
+**/*.pyc
 
 ### DJANGO ###
 db.*
