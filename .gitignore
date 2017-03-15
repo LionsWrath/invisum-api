@@ -80,3 +80,4 @@ invisum/*.pyc
 db.*
 media/*
 !media/.gitkeep
+datasets/migrations/
