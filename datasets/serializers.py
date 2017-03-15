@@ -11,25 +11,14 @@ class DatasetSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'data', 'extension', 'rating', 'owner')
 
 class RatingSerializer(serializers.ModelSerializer):
-    owner = serializers.PrimaryKeyRelatedField(
-            read_only=True,
-            default=serializers.CurrentUserDefault())
+    owner = serializers.ReadOnlyField(source='owner.username')
+    dataset = serializers.ReadOnlyField(source='dataset.id')
 
-    # Dont know if setting None is a good practice in this case
-    dataset = serializers.PrimaryKeyRelatedField(
-            read_only=True,
-            allow_null=True,
-            default=serializers.CreateOnlyDefault(None))
-
+    # Add a error message here after
     class Meta:
         model = Rating
         fields = ('id', 'owner', 'dataset', 'value')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Rating.objects.all(),
-                fields=('owner', 'dataset')
-            )
-        ]
+        #validators = []
 
 class UserSerializer(serializers.ModelSerializer):
     datasets = serializers.PrimaryKeyRelatedField(many=True, queryset=Dataset.objects.all())

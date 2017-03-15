@@ -1,13 +1,15 @@
-from datasets.models import Dataset
+from datasets.models import Dataset, Rating
 from datasets.serializers import DatasetSerializer
 from datasets.serializers import UserSerializer
 from datasets.serializers import RatingSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
+from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 from rest_framework import generics
 from rest_framework import permissions
 from os import path
@@ -87,14 +89,25 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-#Testing the CurrentUserDefault
-class RatingCreate(generics.CreateAPIView):
-    queryset = Dataset.objects.all()
+class RatingCreate(generics.ListCreateAPIView):
     serializer_class = RatingSerializer
 
+    # Check this permissions - is read only permitted?
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+   
+    def get_queryset(self):
+        dataset = self.kwargs['dataset']
+        return Rating.objects.filter(dataset__pk=dataset)
 
     # Associate the user and the dataset to the rating
+    # Validating the unique together constraint
     def perform_create(self, serializer):
-        dataset = Dataset.objects.get(pk=self.kwargs['pk'])
+        user = self.request.user
+        dataset = self.kwargs['dataset']
+
+        if Rating.objects.filter(dataset=dataset, owner=user).exists():            
+            raise ValidationError(_('The User already rated this dataset.'))
+
+        dataset = Dataset.objects.get(pk=self.kwargs['dataset'])
+        
         serializer.save(dataset=dataset)
