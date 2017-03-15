@@ -5,14 +5,20 @@
 API for the In Visum service.
 
 Try aliasing all anaconda stuff to get easier access:
-	ex: ~/cd anaconda2/bin$ for i in *; do alias ana-xz=/home/certorio/Desktop/project/invisum-api/xz; done;
+	
+	$ cd ~/anaconda2/bin
+	$ for i in *; do alias ana-xz=/home/certorio/Desktop/project/invisum-api/xz; done;
 
 Install depedencies with:
+	
 	$ pip install -r pip_dependencies
 
 To setup the first time:
-	ana-python manage.py makemigrations datasets
-	ana-python manage.py migrate
+	
+	$ ana-python manage.py makemigrations datasets
+	
+	$ ana-python manage.py migrate
 
 To run:	
-	ana-python manage.py runserver
+	
+	$ ana-python manage.py runserver
