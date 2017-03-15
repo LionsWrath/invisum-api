@@ -110,4 +110,4 @@ class RatingCreate(generics.ListCreateAPIView):
 
         dataset = Dataset.objects.get(pk=self.kwargs['dataset'])
         
-        serializer.save(dataset=dataset)
+        serializer.save(owner=user, dataset=dataset)
