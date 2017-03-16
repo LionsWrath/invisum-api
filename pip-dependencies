@@ -1,0 +1,8 @@
+#dependencies to be instaled by pip
+django
+djangorestframework
+markdown
+django-filter
+
+
+
