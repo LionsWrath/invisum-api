@@ -112,4 +112,3 @@ class RatingCreate(generics.ListCreateAPIView):
         
         serializer.save(owner=user, dataset=dataset)
 
-class Rating
