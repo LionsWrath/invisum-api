@@ -11,7 +11,7 @@ Try aliasing all anaconda stuff to get easier access:
 
 Install depedencies with:
 	
-	$ pip install -r pip_dependencies
+	$ pip install -r requirements.txt
 
 To setup the first time:
 	
