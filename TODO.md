@@ -20,17 +20,21 @@
     - [X] Serve File by ID
     - [X] Serve File by Filename
 - [ ] Rating
-    - [X] List by User/Dataset
+    - [X] List by User-Dataset
     - [X] Create
-    - [ ] Retrieve
-    - [ ] Update
-    - [ ] Delete    
+    - [X] Retrieve
+    - [X] Update
+    - [X] Delete    
 - [X] Feed
     - [X] Discover (10 Best Rated Datasets)
+- [ ] Data Processing
+    - [ ] Select multiple Datasets and execute commands
+    - [ ] Return the data/graphic
 
 ## Tests
 - [ ] User
 - [ ] Dataset
 - [ ] Rating
 - [ ] Feed
+- [ ] Data Processing
 

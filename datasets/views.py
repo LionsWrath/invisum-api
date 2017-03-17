@@ -89,7 +89,8 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class RatingCreate(generics.ListCreateAPIView):
+# List by Dataset/User
+class RatingList(generics.ListCreateAPIView):
     serializer_class = RatingSerializer
 
     # Check this permissions - is read only permitted?
@@ -97,7 +98,7 @@ class RatingCreate(generics.ListCreateAPIView):
    
     def get_queryset(self):
         dataset = self.kwargs['dataset']
-        return Rating.objects.filter(dataset__pk=dataset)
+        return Rating.objects.filter(dataset__pk=dataset, owner=self.request.user)
 
     # Associate the user and the dataset to the rating
     # Validating the unique together constraint
@@ -112,3 +113,8 @@ class RatingCreate(generics.ListCreateAPIView):
         
         serializer.save(owner=user, dataset=dataset)
 
+class RatingDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
