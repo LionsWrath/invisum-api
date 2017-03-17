@@ -3,10 +3,16 @@ from rest_framework.reverse import reverse
 from django.contrib.auth.models import User
 
 class UserTest(APITestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
+        super(UserTest, self).setUpClass()
         User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
         User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
 
+    #  def setUp(self):
+        #  User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
+        #  User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
+    
     def test_login(self):
         login = self.client.login(username='john', password='johnpassword') 
         self.assertTrue(login) 
@@ -30,7 +36,7 @@ class UserTest(APITestCase):
         data = '[{"id":1,"email":"lennon@thebeatles.com","username":"john","datasets":[]},{"id":2,"email":"jair@dce.com","username":"jair","datasets":[]}]' 
         self.assertEqual(response.content, data)
 
-    def test_retirieve_logged(self):
+    def test_retrieve_logged(self):
         login = self.client.login(username='john', password='johnpassword')  
         response = self.client.get(reverse('user-detail', args=[1]))
 
