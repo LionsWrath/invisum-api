@@ -5,6 +5,8 @@
     - [ ] Hyperlink the API
     - [ ] Use ViewSets
 - [ ] User
+    - [ ] Avatar
+    - [ ] History
     - [X] Login/Logout
     - [X] List
     - [ ] Create (Special case)
