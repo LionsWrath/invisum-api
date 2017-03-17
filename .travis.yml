@@ -27,7 +27,6 @@ install:
     - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION anaconda
     - source activate test-environment
 
-    # Create a requirement file later
     - pip install -r requirements.txt
     - pip install -q mysql-python
 

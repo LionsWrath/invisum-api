@@ -1,6 +1,9 @@
-#TODO
+# TODO
 
 ## API
+- [ ] Others
+    - [ ] Hyperlink the API
+    - [ ] Use ViewSets
 - [ ] User
     - [X] Login/Logout
     - [X] List
@@ -19,7 +22,7 @@
     - [X] Delete
     - [X] Serve File by ID
     - [X] Serve File by Filename
-- [ ] Rating
+- [X] Rating
     - [X] List by User-Dataset
     - [X] Create
     - [X] Retrieve

@@ -11,11 +11,11 @@ urlpatterns = format_suffix_patterns([
     url(r'^users/$', views.UserList.as_view()),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
 
-    # Rating - double check the urls
+    # Rating
     url(r'^datasets/rate/(?P<dataset>[0-9]+)/$', views.RatingList.as_view()),
     url(r'^ratings/(?P<pk>[0-9]+)/$', views.RatingDetail.as_view()),
 
-    # Searches - double check this after
+    # Searches
     url(r'^search/users/(?P<username>.+)/$', views.DatasetByUser.as_view()),
     url(r'^search/title/(?P<title>.+)/$', views.DatasetByName.as_view()), 
 
