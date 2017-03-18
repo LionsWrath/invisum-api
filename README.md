@@ -7,7 +7,7 @@ API for the In Visum service.
 Try aliasing all anaconda stuff to get easier access:
 	
 	$ cd ~/anaconda2/bin
-	$ for i in *; do alias ana-xz=/home/certorio/Desktop/project/invisum-api/xz; done;
+	$ for i in *; do alias "ana-$i"="$(pwd -P)/$i"; done
 
 Install depedencies with:
 	
