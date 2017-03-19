@@ -7,9 +7,10 @@ from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
 from os import path
@@ -109,8 +110,11 @@ class RatingList(generics.ListCreateAPIView):
         if Rating.objects.filter(dataset=dataset, owner=user).exists():            
             raise ValidationError(_('The User already rated this dataset.'))
 
-        dataset = Dataset.objects.get(pk=self.kwargs['dataset'])
-        
+        try:
+            dataset = Dataset.objects.get(pk=self.kwargs['dataset'])
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
         serializer.save(owner=user, dataset=dataset)
 
 class RatingDetail(generics.RetrieveUpdateDestroyAPIView):

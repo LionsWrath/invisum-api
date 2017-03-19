@@ -9,10 +9,14 @@ from os import path
 import pandas as pd
 import json
 
+processed_location = path.join(settings.MEDIA_ROOT, 'processed')
+processed_url = path.join(settings.MEDIA_URL, 'processed')
+
 file_storage = FileSystemStorage(location=settings.MEDIA_ROOT, base_url=settings.MEDIA_URL)
+processed_storage = FileSystemStorage(location=processed_location, base_url=processed_url)
 
 def update_filename(instance, filename):
-    date = instance.created.strftime('%Y-%m-%d_%H-%M-%S')
+    date = instance.created_at.strftime('%Y-%m-%d_%H-%M-%S')
     return '{0}_{1}.{2}'.format(instance.owner.username, 
                                 date, 
                                 instance.get_extension_display().lower()) 
@@ -21,9 +25,9 @@ def update_filename(instance, filename):
 # Need reconfigurable fields for each type of file
 # Check for validators
 class Dataset(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
-    about = models.TextField()
+    about = models.TextField(blank=True)
 
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
     extension = models.CharField(choices=EXTENSION_CHOICES, default='CSV', max_length=20)
@@ -68,7 +72,23 @@ class Dataset(models.Model):
         return self.title
 
     class Meta:
-        ordering = ('created',)
+        ordering = ('created_at',)
+
+class ProcessedDataset(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    description = models.TextField()
+
+    original = models.ForeignKey(Dataset, related_name='processed', on_delete=models.CASCADE)
+    owner = models.ForeignKey('auth.User', related_name='processed', on_delete=models.CASCADE)
+
+    # Maybe change the name of the files
+    processed_data = models.FileField(storage=processed_storage, upload_to=update_filename)    
+
+    class Meta:
+        ordering = ('created_at',)
+ 
 
 class Rating(models.Model):
     owner = models.ForeignKey('auth.User', related_name='ratings', on_delete=models.CASCADE) 
