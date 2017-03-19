@@ -8,10 +8,6 @@ class UserTest(APITestCase):
         super(UserTest, self).setUpClass()
         User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
         User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
-
-    #  def setUp(self):
-        #  User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
-        #  User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
     
     def test_login(self):
         login = self.client.login(username='john', password='johnpassword') 

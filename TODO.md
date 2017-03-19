@@ -14,6 +14,7 @@
     - [ ] Update (email)
     - [ ] Delete (Account deactivation)
 - [ ] Dataset
+    - [X] Add About
     - [ ] Tagging system 
     - [X] List by User (Without Tags)
     - [X] List by Name (Without Tags)

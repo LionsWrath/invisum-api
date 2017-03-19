@@ -19,10 +19,11 @@ def update_filename(instance, filename):
 
 # Encoding of the files may be a future problem
 # Need reconfigurable fields for each type of file
-# Need validators
+# Check for validators
 class Dataset(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
+    about = models.TextField()
 
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
     extension = models.CharField(choices=EXTENSION_CHOICES, default='CSV', max_length=20)
