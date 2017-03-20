@@ -23,7 +23,6 @@ def update_filename(instance, filename):
 
 # Encoding of the files may be a future problem
 # Need reconfigurable fields for each type of file
-# Check for validators
 class Dataset(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100, blank=True, default='')
@@ -32,12 +31,10 @@ class Dataset(models.Model):
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
     extension = models.IntegerField(choices=EXTENSION_CHOICES, default='CSV')
 
-    # Check if this is serializable
     @property
     def rating(self): 
         return Rating.objects.filter(dataset__id=self.id).aggregate(average=Coalesce(Avg('value'),0))
     
-    #Owner
     owner = models.ForeignKey('auth.User', related_name='datasets', on_delete=models.CASCADE)
     
     def process_json(self, url):
@@ -83,7 +80,6 @@ class PersonalDataset(models.Model):
     original = models.ForeignKey(Dataset, related_name='personal', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
 
-    # Maybe change the name of the files
     personal_data = models.FileField(storage=personal_storage, editable=False)    
 
     class Meta:

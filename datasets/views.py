@@ -9,15 +9,13 @@ from django.utils.encoding import smart_str
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
 from os import path
-
-# Testing
-from django.core.files.base import ContentFile
 import uuid
 
 # Sent the 10 best ranked datasets
@@ -77,14 +75,18 @@ class DatasetList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
     # Associate a User to the Dataset - POST
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    def perform_create(self, instance):
+        instance.save(owner=self.request.user)
 
 class DatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Dataset.objects.all()
     serializer_class = DatasetSerializer
 
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+
+    def perform_destroy(self, instance):
+        instance.data.delete(False)
+        instance.delete()
 
 # Testing
 # List all personal datasets of a user
@@ -96,6 +98,7 @@ class PersonalDatasetList(generics.ListAPIView):
         return PersonalDataset.objects.filter(owner=self.request.user)
 
 # Create a new personal dataset based on a original
+# List based on a dataset
 class PersonalDatasetCreate(generics.ListCreateAPIView):
     serializer_class = PersonalDatasetSerializer
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
@@ -108,7 +111,7 @@ class PersonalDatasetCreate(generics.ListCreateAPIView):
 
     # Associate the user and the dataset to the rating
     # Validating the unique together constraint
-    def perform_create(self, serializer):
+    def perform_create(self, instance):
         user = self.request.user
         dataset = self.kwargs['dataset']
 
@@ -120,7 +123,18 @@ class PersonalDatasetCreate(generics.ListCreateAPIView):
         new_file = ContentFile(dataset.data.read())
         new_file.name = '.'.join([str(uuid.uuid4()), dataset.get_extension_display().lower()])
 
-        serializer.save(owner=user, original=dataset, personal_data=new_file)
+        instance.save(owner=user, original=dataset, personal_data=new_file)
+
+class PersonalDatasetDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PersonalDataset.objects.all()
+    serializer_class = PersonalDatasetSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def perform_destroy(self, instance):
+        instance.personal_data.delete(False)
+        instance.delete()
+     
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):
@@ -144,7 +158,7 @@ class RatingList(generics.ListCreateAPIView):
 
     # Associate the user and the dataset to the rating
     # Validating the unique together constraint
-    def perform_create(self, serializer):
+    def perform_create(self, instance):
         user = self.request.user
         dataset = self.kwargs['dataset']
 
@@ -156,7 +170,7 @@ class RatingList(generics.ListCreateAPIView):
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        serializer.save(owner=user, dataset=dataset)
+        instance.save(owner=user, dataset=dataset)
 
 class RatingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rating.objects.all()
