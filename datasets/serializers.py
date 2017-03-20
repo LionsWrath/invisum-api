@@ -1,7 +1,7 @@
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from datasets.models import Dataset, Rating, ProcessedDataset
+from datasets.models import Dataset, Rating, PersonalDataset
 
 # Maybe change the value used to serialize
 
@@ -11,19 +11,14 @@ class DatasetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dataset
         fields = ('id', 'created_at', 'title', 'about', 'data', 'extension', 'rating', 'owner')
-        extra_kwargs = {
-            'id' : {'read_only': True},
-            'data' : {'read_only': True},
-        }
 
-class ProcessedDatasetSerializer(serializers.ModelSerializer):
+class PersonalDatasetSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     original = serializers.ReadOnlyField(source='original.id')
 
     class Meta:
-        model = ProcessedDataset
-        fields = ('id', 'created_at', 'updated_at', 'description', 'original', 'owner', 'processed_data')
-    
+        model = PersonalDataset
+        fields = ('id', 'created_at', 'updated_at', 'description', 'original', 'owner', 'personal_data')
 
 class RatingSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -40,7 +35,3 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'username', 'datasets')
-        extra_kwargs = {
-            'id' : {'read_only': True},
-            'username' : {'read_only': True},
-        }

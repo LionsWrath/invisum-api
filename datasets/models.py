@@ -9,11 +9,11 @@ from os import path
 import pandas as pd
 import json
 
-processed_location = path.join(settings.MEDIA_ROOT, 'processed')
-processed_url = path.join(settings.MEDIA_URL, 'processed')
+personal_location = path.join(settings.MEDIA_ROOT, 'personal')
+personal_url = path.join(settings.MEDIA_URL, 'personal')
 
 file_storage = FileSystemStorage(location=settings.MEDIA_ROOT, base_url=settings.MEDIA_URL)
-processed_storage = FileSystemStorage(location=processed_location, base_url=processed_url)
+personal_storage = FileSystemStorage(location=personal_location, base_url=personal_url)
 
 def update_filename(instance, filename):
     date = instance.created_at.strftime('%Y-%m-%d_%H-%M-%S')
@@ -30,7 +30,7 @@ class Dataset(models.Model):
     about = models.TextField(blank=True)
 
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
-    extension = models.CharField(choices=EXTENSION_CHOICES, default='CSV', max_length=20)
+    extension = models.IntegerField(choices=EXTENSION_CHOICES, default='CSV')
 
     # Check if this is serializable
     @property
@@ -74,17 +74,17 @@ class Dataset(models.Model):
     class Meta:
         ordering = ('created_at',)
 
-class ProcessedDataset(models.Model):
+class PersonalDataset(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     description = models.TextField()
 
-    original = models.ForeignKey(Dataset, related_name='processed', on_delete=models.CASCADE)
-    owner = models.ForeignKey('auth.User', related_name='processed', on_delete=models.CASCADE)
+    original = models.ForeignKey(Dataset, related_name='personal', on_delete=models.CASCADE)
+    owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
 
     # Maybe change the name of the files
-    processed_data = models.FileField(storage=processed_storage, upload_to=update_filename)    
+    personal_data = models.FileField(storage=personal_storage, editable=False)    
 
     class Meta:
         ordering = ('created_at',)

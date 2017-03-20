@@ -1,7 +1,8 @@
-from datasets.models import Dataset, Rating
+from datasets.models import Dataset, PersonalDataset, Rating
 from datasets.serializers import DatasetSerializer
 from datasets.serializers import UserSerializer
 from datasets.serializers import RatingSerializer
+from datasets.serializers import PersonalDatasetSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
@@ -14,6 +15,10 @@ from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
 from os import path
+
+# Testing
+from django.core.files.base import ContentFile
+import uuid
 
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
@@ -80,6 +85,42 @@ class DatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = DatasetSerializer
 
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+
+# Testing
+# List all personal datasets of a user
+class PersonalDatasetList(generics.ListAPIView):
+    serializer_class = PersonalDatasetSerializer
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    
+    def get_queryset(self):
+        return PersonalDataset.objects.filter(owner=self.request.user)
+
+# Create a new personal dataset based on a original
+class PersonalDatasetCreate(generics.ListCreateAPIView):
+    serializer_class = PersonalDatasetSerializer
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        user = self.request.user
+        dataset = self.kwargs['dataset']
+
+        return PersonalDataset.objects.filter(original__id=dataset, owner=user)
+
+    # Associate the user and the dataset to the rating
+    # Validating the unique together constraint
+    def perform_create(self, serializer):
+        user = self.request.user
+        dataset = self.kwargs['dataset']
+
+        try:
+            dataset = Dataset.objects.get(pk=dataset)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        new_file = ContentFile(dataset.data.read())
+        new_file.name = '.'.join([str(uuid.uuid4()), dataset.get_extension_display().lower()])
+
+        serializer.save(owner=user, original=dataset, personal_data=new_file)
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):

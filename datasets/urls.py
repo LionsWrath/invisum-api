@@ -6,6 +6,10 @@ urlpatterns = format_suffix_patterns([
     # Datasets
     url(r'^datasets/$', views.DatasetList.as_view(), name='dataset-list'),
     url(r'^datasets/(?P<pk>[0-9]+)/$', views.DatasetDetail.as_view(), name='dataset-detail'),
+
+    # Personal Datasets
+    url(r'^datasets/personal/$', views.PersonalDatasetList.as_view()),
+    url(r'^datasets/personal/(?P<dataset>[0-9]+)/$', views.PersonalDatasetCreate.as_view()),
     
     # Users
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
