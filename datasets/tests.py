@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
 from os import path
+import json
 
 files_url = path.join(settings.MEDIA_ROOT, 'test')
 
@@ -25,29 +26,39 @@ class UserTest(APITestCase):
 
     def test_list(self):
         response = self.client.get(reverse('user-list'), format='json')
+        content = json.loads(response.content)
 
-        data = '[{"id":1,"email":"lennon@thebeatles.com","username":"john","datasets":[]},{"id":2,"email":"jair@dce.com","username":"jair","datasets":[]}]' 
-        self.assertEqual(response.content, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(content[0]['username'], 'john')
+        self.assertEqual(content[1]['username'], 'jair')
 
     def test_retrieve(self):
-        response = self.client.get(reverse('user-detail', args=[1]))
+        id = User.objects.all()[0].id
+        name = User.objects.all()[0].username
 
-        data = '{"id":1,"email":"lennon@thebeatles.com","username":"john","datasets":[]}'
-        self.assertEqual(response.content, data)
+        response = self.client.get(reverse('user-detail', args=[id]))
+        content = json.loads(response.content)
+
+        self.assertEqual(content['username'], name)
 
     def test_list_logged(self):
-        login = self.client.login(username='john', password='johnpassword') 
+        self.client.login(username='john', password='johnpassword') 
         response = self.client.get(reverse('user-list'), format='json')
+        content = json.loads(response.content)
 
-        data = '[{"id":1,"email":"lennon@thebeatles.com","username":"john","datasets":[]},{"id":2,"email":"jair@dce.com","username":"jair","datasets":[]}]' 
-        self.assertEqual(response.content, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(content[0]['username'], 'john')
+        self.assertEqual(content[1]['username'], 'jair')
 
     def test_retrieve_logged(self):
-        login = self.client.login(username='john', password='johnpassword')  
-        response = self.client.get(reverse('user-detail', args=[1]))
+        id = User.objects.all()[0].id
+        name = User.objects.all()[0].username
 
-        data = '{"id":1,"email":"lennon@thebeatles.com","username":"john","datasets":[]}'
-        self.assertEqual(response.content, data)
+        self.client.login(username='john', password='johnpassword')  
+        response = self.client.get(reverse('user-detail', args=[id]))
+        content = json.loads(response.content)
+
+        self.assertEqual(content['username'], name)
 
 # POST, DELETE
 class DatasetTest(APITestCase):
