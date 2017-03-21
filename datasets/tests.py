@@ -12,6 +12,23 @@ files_url = path.join(settings.MEDIA_ROOT, 'test')
 
 # Status codes: http://www.django-rest-framework.org/api-guide/status-codes
 
+def readFile(filename):
+    datapath = path.join(files_url, filename)
+    f = file(datapath)
+    return SimpleUploadedFile(f.name, f.read())
+
+def cleanDatasets():
+    datasets = Dataset.objects.all()
+    for data in datasets:
+        data.data.delete(False)
+    datasets.delete()
+
+def cleanPersonalDatasets():
+    personals = PersonalDataset.objects.all()
+    for data in personals:
+        data.personal_data.delete(False)
+    personals.delete()
+
 # LIST, RETRIEVE
 class UserTest(APITestCase):
     @classmethod
@@ -29,6 +46,7 @@ class UserTest(APITestCase):
         content = json.loads(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(content), 2)
         self.assertEqual(content[0]['username'], 'john')
         self.assertEqual(content[1]['username'], 'jair')
 
@@ -47,6 +65,7 @@ class UserTest(APITestCase):
         content = json.loads(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(content), 2)
         self.assertEqual(content[0]['username'], 'john')
         self.assertEqual(content[1]['username'], 'jair')
 
@@ -68,13 +87,14 @@ class DatasetTest(APITestCase):
         User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
         User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
 
+    def tearDown(self):
+        cleanDatasets()
+
     def test_dataset_create_1(self):
-        datapath = path.join(files_url, 'tseries_test.csv')
-        f = file(datapath)
         dataset_data_2 = {
             "title": "TimeSeries file",
             "about": "tseries",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('tseries_test.csv'),
             "extension": 1
         }
         
@@ -82,14 +102,13 @@ class DatasetTest(APITestCase):
         response = self.client.post(reverse('dataset-list'), dataset_data_2)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        Dataset.objects.all().delete()
 
     def test_dataset_create_2(self):
-        datapath = path.join(files_url, 'usagov_test.txt')
-        f = file(datapath)
         dataset_data_1 = {
             "title": "Bitly data from USA government",
             "about": "",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('usagov_test.txt'),
             "extension": 2
         }
 
@@ -97,14 +116,13 @@ class DatasetTest(APITestCase):
         response = self.client.post(reverse('dataset-list'), dataset_data_1)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        Dataset.objects.all().delete()
 
     def test_dataset_delete_1(self):
-        datapath = path.join(files_url, 'usagov_test.txt')
-        f = file(datapath)
         dataset_data_1 = {
             "title": "Bitly data from USA government",
             "about": "",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('usagov_test.txt'),
             "extension": 2
         }
 
@@ -118,12 +136,10 @@ class DatasetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
  
     def test_dataset_delete_2(self):
-        datapath = path.join(files_url, 'usagov_test.txt')
-        f = file(datapath)
         dataset_data_1 = {
             "title": "Bitly data from USA government",
             "about": "",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('usagov_test.txt'),
             "extension": 2
         }
 
@@ -148,21 +164,17 @@ class PersonalDatasetTest(APITestCase):
 
     def setUp(self):
 
-        datapath = path.join(files_url, 'usagov_test.txt')
-        f = file(datapath)
         dataset_data_1 = {
             "title": "Bitly data from USA government",
             "about": "",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('usagov_test.txt'),
             "extension": 2
         }
         
-        datapath = path.join(files_url, 'tseries_test.csv')
-        f = file(datapath)
         dataset_data_2 = {
             "title": "TimeSeries file",
             "about": "tseries",
-            "data": SimpleUploadedFile(f.name, f.read()),
+            "data": readFile('tseries_test.csv'),
             "extension": 1
         }
         
@@ -175,7 +187,8 @@ class PersonalDatasetTest(APITestCase):
         self.client.logout()
 
     def tearDown(self):
-        Dataset.objects.all().delete()
+        cleanPersonalDatasets()
+        cleanDatasets()
 
     def test_personal_create_1(self):
         data = { "description": "pdataset" }

@@ -37,6 +37,26 @@ class Dataset(models.Model):
     
     owner = models.ForeignKey('auth.User', related_name='datasets', on_delete=models.CASCADE)
     
+    def filename(self):
+        return path.basename(self.data.name) 
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ('created_at',)
+
+class PersonalDataset(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    description = models.TextField()
+
+    original = models.ForeignKey(Dataset, related_name='personal', on_delete=models.CASCADE)
+    owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
+
+    personal_data = models.FileField(storage=personal_storage, editable=False)    
+
     def process_json(self, url):
         records = [json.loads(line) for line in open(url)]
         return pd.DataFrame(records)
@@ -58,33 +78,16 @@ class Dataset(models.Model):
             '4' : self.process_table,
         }[self.extension]
 
-        url = path.join(settings.MEDIA_ROOT, self.filename())
+        url = path.join(settings.MEDIA_ROOT, 'personal')
+        url = path.join(url, self.filename())
 
         return method(url)
 
     def filename(self):
-        return path.basename(self.data.name) 
-
-    def __str__(self):
-        return self.title
+        return path.basename(self.personal_data.name) 
 
     class Meta:
         ordering = ('created_at',)
-
-class PersonalDataset(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    description = models.TextField()
-
-    original = models.ForeignKey(Dataset, related_name='personal', on_delete=models.CASCADE)
-    owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
-
-    personal_data = models.FileField(storage=personal_storage, editable=False)    
-
-    class Meta:
-        ordering = ('created_at',)
- 
 
 class Rating(models.Model):
     owner = models.ForeignKey('auth.User', related_name='ratings', on_delete=models.CASCADE) 
