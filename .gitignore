@@ -82,3 +82,4 @@ media/personal/*
 !media/.gitkeep
 !media/personal/.gitkeep
 !media/test
+clean.sh
