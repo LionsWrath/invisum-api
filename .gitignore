@@ -75,7 +75,11 @@ Makefile.in
 **/*.pyc
 
 ### DJANGO ###
+datasets/migrations/
 db.*
 media/*
+media/personal/*
 !media/.gitkeep
-datasets/migrations/
+!media/personal/.gitkeep
+!media/test
+clean.sh
