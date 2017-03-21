@@ -78,4 +78,6 @@ Makefile.in
 db.*
 media/*
 !media/.gitkeep
+!media/personal
+!media/test
 datasets/migrations/

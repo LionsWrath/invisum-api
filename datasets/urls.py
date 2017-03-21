@@ -8,9 +8,10 @@ urlpatterns = format_suffix_patterns([
     url(r'^datasets/(?P<pk>[0-9]+)/$', views.DatasetDetail.as_view(), name='dataset-detail'),
 
     # Personal Datasets
-    url(r'^datasets/personal/(?P<dataset>[0-9]+)/$', views.PersonalDatasetCreate.as_view()),
-    url(r'^personal/$', views.PersonalDatasetList.as_view()),
-    url(r'^personal/(?P<pk>[0-9]+)/$', views.PersonalDatasetDetail.as_view()),
+    url(r'^datasets/personal/(?P<dataset>[0-9]+)/$', views.PersonalDatasetCreate.as_view(), 
+        name='personal-create'),
+    url(r'^personal/$', views.PersonalDatasetList.as_view(), name='personal-list'),
+    url(r'^personal/(?P<pk>[0-9]+)/$', views.PersonalDatasetDetail.as_view(), name='personal-detail'),
     
     # Users
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
