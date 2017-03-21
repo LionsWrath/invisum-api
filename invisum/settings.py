@@ -25,7 +25,7 @@ SECRET_KEY = 'f(mm#q1k*^vk@v_hg9um6zo)9u7#pztgr8!yeq(+#*&wglwei_'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
