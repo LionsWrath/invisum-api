@@ -27,6 +27,9 @@ urlpatterns = format_suffix_patterns([
 
     # Feed - need to check if this is really working
     url(r'^discover/$', views.DiscoverFeed.as_view(), name='discover-feed'),
+
+    # Testing operations
+    url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view()),
 ])
 
 urlpatterns += [ 

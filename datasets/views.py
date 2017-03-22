@@ -18,6 +18,10 @@ from rest_framework import permissions
 from os import path
 import uuid
 
+#Testing
+from datasets import operations
+from rest_framework import status
+
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
     serializer_class = DatasetSerializer
@@ -134,7 +138,24 @@ class PersonalDatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.personal_data.delete(False)
         instance.delete()
-     
+
+class PersonalOperation(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def post(self, request, op, pk):
+        operation = {
+            "1" : operations.clean
+        }.get(op, operations.empty)
+
+        try:
+            dataset = PersonalDataset.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        operation(dataset.to_dataframe())
+
+        return Response(status=status.HTTP_200_OK)
+
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):

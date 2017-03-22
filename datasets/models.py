@@ -72,11 +72,11 @@ class PersonalDataset(models.Model):
 
     def to_dataframe(self):
         method = {
-            '1' : self.process_csv,
-            '2' : self.process_json,
-            '3' : self.process_excel,
-            '4' : self.process_table,
-        }[self.extension]
+            1 : self.process_csv,
+            2 : self.process_json,
+            3 : self.process_excel,
+            4 : self.process_table,
+        }[self.original.extension]
 
         url = path.join(settings.MEDIA_ROOT, 'personal')
         url = path.join(url, self.filename())
