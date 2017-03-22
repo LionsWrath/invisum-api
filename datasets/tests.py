@@ -17,6 +17,14 @@ def readFile(filename):
     f = file(datapath)
     return SimpleUploadedFile(f.name, f.read())
 
+def create_dataset(title, about, filename, extension):
+    return {
+        "title": title,
+        "about": about,
+        "data": readFile(filename),
+        "extension": extension
+    }   
+
 def cleanDatasets():
     datasets = Dataset.objects.all()
     for data in datasets:
@@ -91,43 +99,28 @@ class DatasetTest(APITestCase):
         cleanDatasets()
 
     def test_dataset_create_1(self):
-        dataset_data_2 = {
-            "title": "TimeSeries file",
-            "about": "tseries",
-            "data": readFile('tseries_test.csv'),
-            "extension": 1
-        }
+        dataset_2 = create_dataset("TimeSeries", "tseries", "tseries_test.csv", 1)
         
         self.client.login(username='jair', password='jairpassword')
-        response = self.client.post(reverse('dataset-list'), dataset_data_2)
+        response = self.client.post(reverse('dataset-list'), dataset_2)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         Dataset.objects.all().delete()
 
     def test_dataset_create_2(self):
-        dataset_data_1 = {
-            "title": "Bitly data from USA government",
-            "about": "",
-            "data": readFile('usagov_test.txt'),
-            "extension": 2
-        }
-
+        dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
+ 
         self.client.login(username='john', password='johnpassword')
-        response = self.client.post(reverse('dataset-list'), dataset_data_1)
+        response = self.client.post(reverse('dataset-list'), dataset_1)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         Dataset.objects.all().delete()
 
     def test_dataset_delete_1(self):
-        dataset_data_1 = {
-            "title": "Bitly data from USA government",
-            "about": "",
-            "data": readFile('usagov_test.txt'),
-            "extension": 2
-        }
-
+        dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
+ 
         self.client.login(username='john', password='johnpassword')
-        self.client.post(reverse('dataset-list'), dataset_data_1)
+        self.client.post(reverse('dataset-list'), dataset_1)
 
         self.assertEqual(Dataset.objects.count(), 1)
         id = Dataset.objects.all()[0].id
@@ -136,15 +129,11 @@ class DatasetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
  
     def test_dataset_delete_2(self):
-        dataset_data_1 = {
-            "title": "Bitly data from USA government",
-            "about": "",
-            "data": readFile('usagov_test.txt'),
-            "extension": 2
-        }
 
+        dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
+        
         self.client.login(username='john', password='johnpassword')
-        self.client.post(reverse('dataset-list'), dataset_data_1)
+        self.client.post(reverse('dataset-list'), dataset_1)
         self.client.logout()
 
         self.assertEqual(Dataset.objects.count(), 1)
@@ -164,26 +153,15 @@ class PersonalDatasetTest(APITestCase):
 
     def setUp(self):
 
-        dataset_data_1 = {
-            "title": "Bitly data from USA government",
-            "about": "",
-            "data": readFile('usagov_test.txt'),
-            "extension": 2
-        }
-        
-        dataset_data_2 = {
-            "title": "TimeSeries file",
-            "about": "tseries",
-            "data": readFile('tseries_test.csv'),
-            "extension": 1
-        }
-        
+        dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
+        dataset_2 = create_dataset("TimeSeries", "tseries", "tseries_test.csv", 1)
+               
         self.client.login(username='jair', password='jairpassword')
-        self.client.post(reverse('dataset-list'), dataset_data_2)
+        self.client.post(reverse('dataset-list'), dataset_2)
         self.client.logout()
 
         self.client.login(username='john', password='johnpassword')
-        self.client.post(reverse('dataset-list'), dataset_data_1)
+        self.client.post(reverse('dataset-list'), dataset_1)
         self.client.logout()
 
     def tearDown(self):
