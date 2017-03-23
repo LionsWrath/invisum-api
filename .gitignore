@@ -81,5 +81,6 @@ media/*
 media/personal/*
 !media/.gitkeep
 !media/personal/.gitkeep
+!media/html/.gitkeep
 !media/test
 clean.sh

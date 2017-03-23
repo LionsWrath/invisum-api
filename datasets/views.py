@@ -20,7 +20,9 @@ import uuid
 
 #Testing
 from datasets import operations
+from datasets import plots
 from rest_framework import status
+from rest_framework.renderers import StaticHTMLRenderer
 
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
@@ -156,6 +158,30 @@ class PersonalOperation(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
+class PlotOperation(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    renderer_classes = (StaticHTMLRenderer,)
+
+    def readFile(self, path):
+        f = file(path)
+        return f.read()
+
+    def get(self, request, op, pk):
+        chart = {
+            "1" : plots.create_histogram,
+            "2" : plots.create_bar
+        }.get(op, operations.empty)
+
+        try:
+            dataset = PersonalDataset.objects.get(pk=pk)
+            print dataset
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        filepath = chart(dataset.to_dataframe(), **dict(request.GET.iterlists()))
+        content = self.readFile(filepath)
+
+        return Response(content)
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):

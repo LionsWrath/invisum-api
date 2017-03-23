@@ -3,3 +3,4 @@ djangorestframework==3.5.4
 markdown
 django-filter==1.0.1
 django-cors-headers
+bokeh==0.12.4
