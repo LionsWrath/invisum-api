@@ -62,7 +62,7 @@ class PersonalDataset(models.Model):
         return pd.DataFrame(records)
 
     def process_csv(self, url):
-        return pd.read_csv(url)
+        return pd.read_csv(url, header=None)
 
     def process_excel(self, url):
         return pd.read_excel(url)
@@ -82,6 +82,32 @@ class PersonalDataset(models.Model):
         url = path.join(url, self.filename())
 
         return method(url)
+
+    def update_csv(self, dataframe, url):
+        # Not cool setting a enconding like this
+        dataframe.to_csv(url, encoding='utf-8', header=None, index=None)
+
+    def update_json(self, dataframe, url):
+        dataframe.to_json(url, orient='records', lines=True)
+
+    def update_excel(self, dataframe, url):
+        pass
+
+    def update_table(self, dataframe, url):
+        pass
+    
+    def update_file(self, dataframe):
+        method = {
+            1 : self.update_csv,
+            2 : self.update_json,
+            3 : self.update_excel,
+            4 : self.update_table,
+        }[self.original.extension]
+
+        url = path.join(settings.MEDIA_ROOT, 'personal')
+        url = path.join(url, self.filename())
+
+        method(dataframe, url)
 
     def filename(self):
         return path.basename(self.personal_data.name) 

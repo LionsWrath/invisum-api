@@ -11,18 +11,18 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
+from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import status
 from os import path
 import uuid
 
 #Testing
 from datasets import operations
 from datasets import plots
-from rest_framework import status
-from rest_framework.renderers import StaticHTMLRenderer
 
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
@@ -146,7 +146,9 @@ class PersonalOperation(APIView):
 
     def post(self, request, op, pk):
         operation = {
-            "1" : operations.clean
+            "1" : operations.clean,
+            "2" : operations.count,
+            "3" : operations.slice
         }.get(op, operations.empty)
 
         try:
@@ -154,7 +156,8 @@ class PersonalOperation(APIView):
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        operation(dataset.to_dataframe())
+        result = operation(dataset.to_dataframe(), **request.data)
+        dataset.update_file(result)
 
         return Response(status=status.HTTP_200_OK)
 

@@ -26,6 +26,8 @@ def create_histogram(dataframe, *args, **kwargs):
 def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
 
+    print dataframe
+
     chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **kwargs)
     chart.toolbar.logo = None
 
