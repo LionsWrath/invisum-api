@@ -21,12 +21,12 @@ def create_histogram(dataframe, *args, **kwargs):
     output_file(filepath)
     save(chart, title="Invisum Plot")
 
-    return filepath
+    return path.basename(filepath)
 
 def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
 
-    print dataframe
+    print kwargs
 
     chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **kwargs)
     chart.toolbar.logo = None
@@ -34,4 +34,4 @@ def create_bar(dataframe, *args, **kwargs):
     output_file(filepath)
     save(chart, title="Invisum Plot")
 
-    return filepath
+    return path.basename(filepath)

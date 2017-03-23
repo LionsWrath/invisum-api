@@ -1,8 +1,9 @@
-from datasets.models import Dataset, PersonalDataset, Rating
+from datasets.models import Dataset, PersonalDataset, Rating, Plot
 from datasets.serializers import DatasetSerializer
 from datasets.serializers import UserSerializer
 from datasets.serializers import RatingSerializer
 from datasets.serializers import PersonalDatasetSerializer
+from datasets.serializers import PlotSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
@@ -161,15 +162,30 @@ class PersonalOperation(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
-class PlotOperation(APIView):
+class PlotServe(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
     renderer_classes = (StaticHTMLRenderer,)
 
-    def readFile(self, path):
-        f = file(path)
+    def readFile(self, filepath):
+        fullpath = path.join(settings.BASE_DIR, path.relpath(filepath, '/'))
+        f = file(fullpath)
         return f.read()
 
-    def get(self, request, op, pk):
+    def get(self, request, pk):
+        plot = Plot.objects.get(pk=pk)
+        content = self.readFile(plot.html.url)
+
+        return Response(content)
+
+class PlotCreate(generics.CreateAPIView):
+    serializer_class = PlotSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+   
+    def perform_create(self, instance):
+        op = self.kwargs['op']
+        pk = self.kwargs['pk']
+
         chart = {
             "1" : plots.create_histogram,
             "2" : plots.create_bar
@@ -177,14 +193,12 @@ class PlotOperation(APIView):
 
         try:
             dataset = PersonalDataset.objects.get(pk=pk)
-            print dataset
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        filepath = chart(dataset.to_dataframe(), **dict(request.GET.iterlists()))
-        content = self.readFile(filepath)
+        filename = chart(dataset.to_dataframe(), **dict(self.request.data))
 
-        return Response(content)
+        instance.save(owner=self.request.user, html=filename)
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):

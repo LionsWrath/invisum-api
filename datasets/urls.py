@@ -30,7 +30,8 @@ urlpatterns = format_suffix_patterns([
 
     # Testing operations
     url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view()),
-    url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotOperation.as_view()),
+    url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotCreate.as_view()),
+    url(r'^personal/plot/(?P<pk>[0-9]+)/$', views.PlotServe.as_view()),
 ])
 
 urlpatterns += [ 

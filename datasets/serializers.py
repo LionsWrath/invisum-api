@@ -1,7 +1,7 @@
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from datasets.models import Dataset, Rating, PersonalDataset
+from datasets.models import Dataset, Rating, PersonalDataset, Plot
 
 # Maybe change the value used to serialize
 
@@ -35,3 +35,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'username', 'datasets')
+
+class PlotSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Plot
+        fields = ('id', 'owner', 'html')
