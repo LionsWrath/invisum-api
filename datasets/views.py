@@ -18,12 +18,10 @@ from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
-from os import path
-import uuid
-
-#Testing
 from datasets import operations
 from datasets import plots
+from os import path
+import uuid
 
 # Sent the 10 best ranked datasets
 class DiscoverFeed(generics.ListAPIView):
