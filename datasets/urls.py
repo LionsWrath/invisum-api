@@ -27,9 +27,16 @@ urlpatterns = format_suffix_patterns([
 
     # Feed - need to check if this is really working
     url(r'^discover/$', views.DiscoverFeed.as_view(), name='discover-feed'),
+
+    # Operations
+    url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view()),
+    url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotCreate.as_view()),
 ])
 
 urlpatterns += [ 
+    # Serve a plot
+    url(r'^personal/plot/(?P<pk>[0-9]+)/$', views.PlotServe.as_view()),
+    
     # Change this to follow MEDIA_URL
     url(r'^media/(?P<pk>[0-9]+)/$', views.DatasetServeById.as_view(), name='media-dataset'),
     url(r'^media/(?P<filename>.+)/$', views.DatasetServeByFilename.as_view(), name='media-filename'),

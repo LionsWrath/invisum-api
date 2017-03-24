@@ -1,8 +1,9 @@
-from datasets.models import Dataset, PersonalDataset, Rating
+from datasets.models import Dataset, PersonalDataset, Rating, Plot
 from datasets.serializers import DatasetSerializer
 from datasets.serializers import UserSerializer
 from datasets.serializers import RatingSerializer
 from datasets.serializers import PersonalDatasetSerializer
+from datasets.serializers import PlotSerializer
 from datasets.permissions import IsOwnerOrReadOnly
 from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
@@ -11,10 +12,14 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
+from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import status
+from datasets import operations
+from datasets import plots
 from os import path
 import uuid
 
@@ -134,7 +139,67 @@ class PersonalDatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         instance.personal_data.delete(False)
         instance.delete()
-     
+
+class PersonalOperation(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def post(self, request, op, pk):
+        operation = {
+            "1" : operations.clean,
+            "2" : operations.count,
+            "3" : operations.slice
+        }.get(op, operations.empty)
+
+        try:
+            dataset = PersonalDataset.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        result = operation(dataset.to_dataframe(), **request.data)
+        dataset.update_file(result)
+
+        return Response(status=status.HTTP_200_OK)
+
+class PlotServe(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    renderer_classes = (StaticHTMLRenderer,)
+
+    def readFile(self, filepath):
+        fullpath = path.join(settings.BASE_DIR, path.relpath(filepath, '/'))
+        f = file(fullpath)
+        return f.read()
+
+    def get(self, request, pk):
+        try:
+            plot = Plot.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+        content = self.readFile(plot.html.url)
+
+        return Response(content)
+
+class PlotCreate(generics.CreateAPIView):
+    serializer_class = PlotSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+   
+    def perform_create(self, instance):
+        op = self.kwargs['op']
+        pk = self.kwargs['pk']
+
+        chart = {
+            "1" : plots.create_histogram,
+            "2" : plots.create_bar
+        }.get(op, operations.empty)
+
+        try:
+            dataset = PersonalDataset.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        filename = chart(dataset.to_dataframe(), **dict(self.request.data))
+
+        instance.save(owner=self.request.user, html=filename)
 
 # Create a ViewSet for the user later
 class UserList(generics.ListAPIView):

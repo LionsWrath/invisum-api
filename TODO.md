@@ -14,6 +14,7 @@
     - [ ] Update (email)
     - [ ] Delete (Account deactivation)
 - [ ] Dataset
+    - [ ] Attr for extension(header, index etc)
     - [X] Add About
     - [ ] Add License
     - [ ] Tagging system 
@@ -35,6 +36,8 @@
 - [X] Feed
     - [X] Discover (10 Best Rated Datasets)
 - [ ] Data Processing
+    - [ ] Bokeh dont accept numerical header names
+    - [ ] Possibility of change of extension in Personal
     - [ ] User-based correction system
     - [ ] Select multiple Datasets and execute commands
     - [ ] Return the data/graphic
