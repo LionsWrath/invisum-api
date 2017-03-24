@@ -172,7 +172,10 @@ class PlotServe(APIView):
         return f.read()
 
     def get(self, request, pk):
-        plot = Plot.objects.get(pk=pk)
+        try:
+            plot = Plot.objects.get(pk=pk)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
         content = self.readFile(plot.html.url)
 
         return Response(content)

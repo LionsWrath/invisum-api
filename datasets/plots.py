@@ -12,10 +12,20 @@ def generate_path():
     filepath = path.join(htmlpath, filename)
     return filepath
 
+def args_dict(kwargs, possible):
+    args = {}
+    for k, v in kwargs.iteritems():
+        if k in possible:
+            args[k] = v
+    return args
+
 def create_histogram(dataframe, *args, **kwargs):
     filepath = generate_path()
+    possible_arguments = {}
 
-    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **kwargs)
+    args = args_dict(kwargs, possible_arguments)
+
+    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
     chart.toolbar.logo = None
 
     output_file(filepath)
@@ -25,10 +35,11 @@ def create_histogram(dataframe, *args, **kwargs):
 
 def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
+    possible_arguments = {'values', 'label', 'plot_width', 'plot_height', 'legend'}
 
-    print kwargs
+    args = args_dict(kwargs, possible_arguments)
 
-    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **kwargs)
+    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
     chart.toolbar.logo = None
 
     output_file(filepath)
