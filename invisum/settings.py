@@ -24,8 +24,13 @@ SECRET_KEY = 'f(mm#q1k*^vk@v_hg9um6zo)9u7#pztgr8!yeq(+#*&wglwei_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-#CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = ['*']
+
+# Testing this configurations
+# Allow all origins
+CORS_ORIGIN_ALLOW_ALL = True
+# Allow cookies
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -39,7 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'datasets.apps.DatasetsConfig',
     
-    #'corsheaders', 
+    'corsheaders', 
 ]
 
 MIDDLEWARE = [
@@ -51,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    #'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'invisum.urls'
