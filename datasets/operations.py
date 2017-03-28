@@ -2,6 +2,13 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError
 import pandas as pd
 
+def args_dict(kwargs, possible):
+    args = {}
+    for k, v in kwargs.iteritems():
+        if k in possible:
+            args[k] = v
+    return args
+
 # dummy function
 def empty(dataframe, *args, **kwargs):
     print dataframe
@@ -54,3 +61,22 @@ def slice(dataframe, *args, **kwargs):
         step = 1
 
     return dataframe[left:right:step]
+
+# Multiple Dataset Operations ------------------------------------------------
+
+# dummy function
+def m_empty(left_dataframe, right_dataframe, *args, **kwargs):
+    print left_dataframe
+    print right_dataframe
+    print kwargs
+
+    return left_dataframe
+
+def merge(left_dataframe, right_dataframe, *args, **kwargs):
+    possible_arguments = {'how', 'on', 'left_on', 'right_on', 'left_index', 'right_index', 'sort', 'suffixes', 'copy', 'indicator'}
+
+    print kwargs
+
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return left_dataframe.merge(right_dataframe, **p_args)

@@ -23,9 +23,9 @@ def create_histogram(dataframe, *args, **kwargs):
     filepath = generate_path()
     possible_arguments = {}
 
-    args = args_dict(kwargs, possible_arguments)
+    p_args = args_dict(kwargs, possible_arguments)
 
-    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
+    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
     chart.toolbar.logo = None
 
     output_file(filepath)
@@ -37,9 +37,9 @@ def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
     possible_arguments = {'values', 'label', 'plot_width', 'plot_height', 'legend'}
 
-    args = args_dict(kwargs, possible_arguments)
+    p_args = args_dict(kwargs, possible_arguments)
 
-    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
+    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
     chart.toolbar.logo = None
 
     output_file(filepath)

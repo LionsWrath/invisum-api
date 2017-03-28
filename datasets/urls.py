@@ -31,6 +31,10 @@ urlpatterns = format_suffix_patterns([
     # Operations
     url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view()),
     url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotCreate.as_view()),
+
+    # Testing
+    url(r'^personal/operation/(?P<op>[0-9]+)/(?P<l_pk>[0-9]+)-(?P<r_pk>[0-9]+)/$', 
+        views.PersonalMultisetOperation.as_view()),
 ])
 
 urlpatterns += [ 

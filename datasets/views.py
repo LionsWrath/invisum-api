@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import StaticHTMLRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import APIException 
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -29,7 +30,7 @@ class DiscoverFeed(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating)
+        dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating, reverse=True)
         return dataframes[:10] 
 
 # Search a Dataset by title (case insensitive)
@@ -144,6 +145,8 @@ class PersonalOperation(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
 
     def post(self, request, op, pk):
+        user = request.user
+
         operation = {
             "1" : operations.clean,
             "2" : operations.count,
@@ -151,7 +154,7 @@ class PersonalOperation(APIView):
         }.get(op, operations.empty)
 
         try:
-            dataset = PersonalDataset.objects.get(pk=pk)
+            dataset = PersonalDataset.objects.get(pk=pk, owner=user)
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
@@ -159,6 +162,41 @@ class PersonalOperation(APIView):
         dataset.update_file(result)
 
         return Response(status=status.HTTP_200_OK)
+
+# Will need to change this when change the MTM
+class PersonalMultisetOperation(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def post(self, request, op, l_pk, r_pk):
+        user = request.user
+
+        operation = {
+            "1" : operations.merge,
+        }.get(op, operations.m_empty)
+
+        try:
+            l_dataset = PersonalDataset.objects.get(pk=l_pk, owner=user)
+            r_dataset = PersonalDataset.objects.get(pk=r_pk, owner=user)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        try:
+            result = operation(l_dataset.to_dataframe(), r_dataset.to_dataframe(), **request.data)
+        except:
+            #Change this exception later - maybe a custom one
+            raise APIException(_("Incorrect values on merge operation.")) 
+        
+        new_file = ContentFile("")
+        new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.original.get_extension_display().lower()])
+
+        # Change original to originals(MTM)
+        new_personal = PersonalDataset(owner=user, original=l_dataset.original, personal_data=new_file)
+        new_personal.save()
+        new_personal.update_file(result)
+
+        return Response(status=status.HTTP_200_OK)
+
+
 
 class PlotServe(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
