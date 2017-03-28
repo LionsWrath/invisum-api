@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import APIException
 import pandas as pd
 
 def args_dict(kwargs, possible):
@@ -13,6 +14,8 @@ def args_dict(kwargs, possible):
 def empty(dataframe, *args, **kwargs):
     print dataframe
     print kwargs
+
+    raise APIException(_("This operation does not exist."))
 
     return dataframe
 
@@ -63,19 +66,10 @@ def slice(dataframe, *args, **kwargs):
     return dataframe[left:right:step]
 
 # Multiple Dataset Operations ------------------------------------------------
-
-# dummy function
-def m_empty(left_dataframe, right_dataframe, *args, **kwargs):
-    print left_dataframe
-    print right_dataframe
-    print kwargs
-
-    return left_dataframe
+# Move this to another file
 
 def merge(left_dataframe, right_dataframe, *args, **kwargs):
     possible_arguments = {'how', 'on', 'left_on', 'right_on', 'left_index', 'right_index', 'sort', 'suffixes', 'copy', 'indicator'}
-
-    print kwargs
 
     p_args = args_dict(kwargs, possible_arguments)
     

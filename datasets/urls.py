@@ -35,6 +35,7 @@ urlpatterns = format_suffix_patterns([
     # Testing
     url(r'^personal/operation/(?P<op>[0-9]+)/(?P<l_pk>[0-9]+)-(?P<r_pk>[0-9]+)/$', 
         views.PersonalMultisetOperation.as_view()),
+    url(r'^personal/(?P<pk>[0-9]+)/meta/$', views.PersonalMeta.as_view()),
 ])
 
 urlpatterns += [ 

@@ -13,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.renderers import StaticHTMLRenderer
+from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.exceptions import APIException 
@@ -22,6 +23,7 @@ from rest_framework import status
 from datasets import operations
 from datasets import plots
 from os import path
+import json
 import uuid
 
 # Sent the 10 best ranked datasets
@@ -172,7 +174,7 @@ class PersonalMultisetOperation(APIView):
 
         operation = {
             "1" : operations.merge,
-        }.get(op, operations.m_empty)
+        }.get(op, operations.empty)
 
         try:
             l_dataset = PersonalDataset.objects.get(pk=l_pk, owner=user)
@@ -182,9 +184,11 @@ class PersonalMultisetOperation(APIView):
 
         try:
             result = operation(l_dataset.to_dataframe(), r_dataset.to_dataframe(), **request.data)
+        except APIException:
+            raise
         except:
             #Change this exception later - maybe a custom one
-            raise APIException(_("Incorrect values on merge operation.")) 
+            raise APIException(_("Incorrect values on operation.")) 
         
         new_file = ContentFile("")
         new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.original.get_extension_display().lower()])
@@ -196,7 +200,16 @@ class PersonalMultisetOperation(APIView):
 
         return Response(status=status.HTTP_200_OK)
 
+class PersonalMeta(APIView):
+    renderer_classes = (JSONRenderer,)
 
+    def get(self, request, pk):
+        dataset = PersonalDataset.objects.get(pk=pk)
+        dataframe = dataset.to_dataframe()
+
+        headers = list(dataframe)
+
+        return Response(json.dumps(headers))
 
 class PlotServe(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
