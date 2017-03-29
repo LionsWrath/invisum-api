@@ -14,27 +14,46 @@ def args_dict(kwargs, possible):
 def empty(dataframe, *args, **kwargs):
     print dataframe
     print kwargs
+    print dataframe.dtypes
 
     raise APIException(_("This operation does not exist."))
 
-    return dataframe
+def dropna(dataframe, *args, **kwargs):
+    possible_arguments = {'how'}
 
-# Fillna - column or line
-# emptystr - column or line - subs
-def clean(dataframe, *args, **kwargs):
-    print dataframe
-    print kwargs
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return dataframe.dropna(**p_args)
 
-    return dataframe
+def fillna(dataframe, *args, **kwargs):
+    possible_arguments = {'value'}
 
-# Count the values on a column or line
-# Maybe generate a ney set
-# Create a series
-def count(dataframe, *args, **kwargs):
-    print dataframe
-    print kwargs
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return dataframe.fillna(**p_args)
 
-    return dataframe
+def drop(dataframe, *args, **kwargs):
+    possible_arguments = {'labels'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return dataframe.drop(**p_args)
+
+def filter(dataframe, *args, **kwargs):
+    possible_arguments = {'items', 'like', 'regex', 'axis'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return dataframe.filter(**p_args)
+
+def sort(dataframe, *args, **kwargs):
+    possible_arguments = {'columns', 'ascending', 'axis', 'na_position'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+    
+    return dataframe.sort(**p_args)
+
+
 
 # left, right, step
 # Use exceptions after

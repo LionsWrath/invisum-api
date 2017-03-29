@@ -17,6 +17,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework.exceptions import APIException 
+from rest_framework.exceptions import ParseError
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
@@ -131,7 +132,7 @@ class PersonalDatasetCreate(generics.ListCreateAPIView):
         new_file = ContentFile(dataset.data.read())
         new_file.name = '.'.join([str(uuid.uuid4()), dataset.get_extension_display().lower()])
 
-        instance.save(owner=user, original=dataset, personal_data=new_file)
+        instance.save(owner=user, original=dataset, personal_data=new_file, extension=dataset.extension)
 
 class PersonalDatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = PersonalDataset.objects.all()
@@ -150,9 +151,12 @@ class PersonalOperation(APIView):
         user = request.user
 
         operation = {
-            "1" : operations.clean,
-            "2" : operations.count,
-            "3" : operations.slice
+            "1" : operations.slice,
+            "2" : operations.drop,
+            "3" : operations.filter,
+            "4" : operations.fillna,
+            "5" : operations.dropna,
+            "6" : operations.sort,
         }.get(op, operations.empty)
 
         try:
@@ -160,7 +164,13 @@ class PersonalOperation(APIView):
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        result = operation(dataset.to_dataframe(), **request.data)
+        try:
+            result = operation(dataset.to_dataframe(), **request.data)
+        except ParseError:
+            raise
+        except:
+            raise APIException(_("Incorrect values on operation."))
+
         dataset.update_file(result)
 
         return Response(status=status.HTTP_200_OK)
@@ -191,7 +201,7 @@ class PersonalMultisetOperation(APIView):
             raise APIException(_("Incorrect values on operation.")) 
         
         new_file = ContentFile("")
-        new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.original.get_extension_display().lower()])
+        new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.get_extension_display().lower()])
 
         # Change original to originals(MTM)
         new_personal = PersonalDataset(owner=user, original=l_dataset.original, personal_data=new_file)
@@ -240,7 +250,8 @@ class PlotCreate(generics.CreateAPIView):
 
         chart = {
             "1" : plots.create_histogram,
-            "2" : plots.create_bar
+            "2" : plots.create_bar,
+            "3" : plots.create_line,
         }.get(op, operations.empty)
 
         try:

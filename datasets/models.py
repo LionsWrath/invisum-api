@@ -60,6 +60,7 @@ class PersonalDataset(models.Model):
     owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
 
     personal_data = models.FileField(storage=personal_storage, editable=False)    
+    extension = models.IntegerField(choices=EXTENSION_CHOICES, default='CSV', editable=False)
 
     def process_json(self, url):
         records = [json.loads(line) for line in open(url)]
@@ -80,7 +81,7 @@ class PersonalDataset(models.Model):
             2 : self.process_json,
             3 : self.process_excel,
             4 : self.process_table,
-        }[self.original.extension]
+        }[self.extension]
 
         url = path.join(settings.MEDIA_ROOT, 'personal')
         url = path.join(url, self.filename())
@@ -106,7 +107,7 @@ class PersonalDataset(models.Model):
             2 : self.update_json,
             3 : self.update_excel,
             4 : self.update_table,
-        }[self.original.extension]
+        }[self.extension]
 
         url = path.join(settings.MEDIA_ROOT, 'personal')
         url = path.join(url, self.filename())

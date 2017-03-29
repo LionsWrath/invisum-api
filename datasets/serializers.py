@@ -18,7 +18,8 @@ class PersonalDatasetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PersonalDataset
-        fields = ('id', 'created_at', 'updated_at', 'description', 'original', 'owner', 'personal_data')
+        fields = ('id', 'created_at', 'updated_at', 'description', 
+                'original', 'owner', 'personal_data', 'extension')
 
 class RatingSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
