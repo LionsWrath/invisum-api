@@ -13,14 +13,18 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework.renderers import StaticHTMLRenderer
+from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import APIException 
+from rest_framework.exceptions import ParseError
 from rest_framework import generics
 from rest_framework import permissions
 from rest_framework import status
 from datasets import operations
 from datasets import plots
 from os import path
+import json
 import uuid
 
 # Sent the 10 best ranked datasets
@@ -29,7 +33,7 @@ class DiscoverFeed(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating)
+        dataframes = sorted(Dataset.objects.all(), key=lambda t: t.rating, reverse=True)
         return dataframes[:10] 
 
 # Search a Dataset by title (case insensitive)
@@ -128,7 +132,7 @@ class PersonalDatasetCreate(generics.ListCreateAPIView):
         new_file = ContentFile(dataset.data.read())
         new_file.name = '.'.join([str(uuid.uuid4()), dataset.get_extension_display().lower()])
 
-        instance.save(owner=user, original=dataset, personal_data=new_file)
+        instance.save(owner=user, original=dataset, personal_data=new_file, extension=dataset.extension)
 
 class PersonalDatasetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = PersonalDataset.objects.all()
@@ -144,21 +148,78 @@ class PersonalOperation(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
 
     def post(self, request, op, pk):
+        user = request.user
+
         operation = {
-            "1" : operations.clean,
-            "2" : operations.count,
-            "3" : operations.slice
+            "1" : operations.slice,
+            "2" : operations.drop,
+            "3" : operations.filter,
+            "4" : operations.fillna,
+            "5" : operations.dropna,
+            "6" : operations.sort,
         }.get(op, operations.empty)
 
         try:
-            dataset = PersonalDataset.objects.get(pk=pk)
+            dataset = PersonalDataset.objects.get(pk=pk, owner=user)
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        result = operation(dataset.to_dataframe(), **request.data)
+        try:
+            result = operation(dataset.to_dataframe(), **request.data)
+        except ParseError:
+            raise
+        except:
+            raise APIException(_("Incorrect values on operation."))
+
         dataset.update_file(result)
 
         return Response(status=status.HTTP_200_OK)
+
+# Will need to change this when change the MTM
+class PersonalMultisetOperation(APIView):
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def post(self, request, op, l_pk, r_pk):
+        user = request.user
+
+        operation = {
+            "1" : operations.merge,
+        }.get(op, operations.empty)
+
+        try:
+            l_dataset = PersonalDataset.objects.get(pk=l_pk, owner=user)
+            r_dataset = PersonalDataset.objects.get(pk=r_pk, owner=user)
+        except ObjectDoesNotExist:
+            raise NotFound(_('Wrong value for dataset query.'))
+
+        try:
+            result = operation(l_dataset.to_dataframe(), r_dataset.to_dataframe(), **request.data)
+        except APIException:
+            raise
+        except:
+            #Change this exception later - maybe a custom one
+            raise APIException(_("Incorrect values on operation.")) 
+        
+        new_file = ContentFile("")
+        new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.get_extension_display().lower()])
+
+        # Change original to originals(MTM)
+        new_personal = PersonalDataset(owner=user, original=l_dataset.original, personal_data=new_file)
+        new_personal.save()
+        new_personal.update_file(result)
+
+        return Response(status=status.HTTP_200_OK)
+
+class PersonalMeta(APIView):
+    renderer_classes = (JSONRenderer,)
+
+    def get(self, request, pk):
+        dataset = PersonalDataset.objects.get(pk=pk)
+        dataframe = dataset.to_dataframe()
+
+        headers = list(dataframe)
+
+        return Response(json.dumps(headers))
 
 class PlotServe(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
@@ -169,15 +230,36 @@ class PlotServe(APIView):
         f = file(fullpath)
         return f.read()
 
-    def get(self, request, pk):
+    def get_object(self, pk):
         try:
             plot = Plot.objects.get(pk=pk)
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
+
+        return plot
+
+    def get(self, request, pk):
+        plot = self.get_object(pk)
         content = self.readFile(plot.html.url)
 
         return Response(content)
 
+    def delete(self, request, pk):
+        plot = self.get_object(pk)
+        plot.html.delete(False)
+        plot.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class PlotList(generics.ListAPIView):
+    serializer_class = PlotSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Plot.objects.filter(owner=user)
+   
 class PlotCreate(generics.CreateAPIView):
     serializer_class = PlotSerializer
 
@@ -189,7 +271,9 @@ class PlotCreate(generics.CreateAPIView):
 
         chart = {
             "1" : plots.create_histogram,
-            "2" : plots.create_bar
+            "2" : plots.create_bar,
+            "3" : plots.create_line,
+            "4" : plots.create_scatter,
         }.get(op, operations.empty)
 
         try:
@@ -197,7 +281,10 @@ class PlotCreate(generics.CreateAPIView):
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        filename = chart(dataset.to_dataframe(), **dict(self.request.data))
+        try:
+            filename = chart(dataset.to_dataframe(), **dict(self.request.data))
+        except:
+            raise APIException(_("Error on chart configuration."))
 
         instance.save(owner=self.request.user, html=filename)
 

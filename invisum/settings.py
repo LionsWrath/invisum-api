@@ -26,11 +26,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Testing this configurations
+# Testing this configurations---------------------------
+
 # Allow all origins
 CORS_ORIGIN_ALLOW_ALL = True
+
 # Allow cookies
 CORS_ALLOW_CREDENTIALS = True
+
+#-------------------------------------------------------
+
+# Redirect after login
+LOGIN_REDIRECT_URL = '/discover/'
 
 # Application definition
 
@@ -78,7 +85,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'invisum.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases

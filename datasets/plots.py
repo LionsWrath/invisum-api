@@ -1,4 +1,4 @@
-from bokeh.charts import Histogram, Bar
+from bokeh.charts import Histogram, Bar, Line, Scatter
 from bokeh.charts import save, output_file
 from django.conf import settings
 from os import path
@@ -23,9 +23,9 @@ def create_histogram(dataframe, *args, **kwargs):
     filepath = generate_path()
     possible_arguments = {}
 
-    args = args_dict(kwargs, possible_arguments)
+    p_args = args_dict(kwargs, possible_arguments)
 
-    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
+    chart = Histogram(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
     chart.toolbar.logo = None
 
     output_file(filepath)
@@ -37,9 +37,39 @@ def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
     possible_arguments = {'values', 'label', 'plot_width', 'plot_height', 'legend'}
 
-    args = args_dict(kwargs, possible_arguments)
+    p_args = args_dict(kwargs, possible_arguments)
 
-    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **args)
+    chart = Bar(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
+    chart.toolbar.logo = None
+
+    output_file(filepath)
+    save(chart, title="Invisum Plot")
+
+    return path.basename(filepath)
+
+def create_line(dataframe, *args, **kwargs):
+    filepath = generate_path()
+    possible_arguments = {'x', 'y'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+
+    dataframe.stack()
+
+    chart = Line(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
+    chart.toolbar.logo = None
+
+    output_file(filepath)
+    save(chart, title="Invisum Plot")
+
+    return path.basename(filepath)
+
+def create_scatter(dataframe, *args, **kwargs):
+    filepath = generate_path()
+    possible_arguments = {'x', 'y'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+
+    chart = Scatter(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
     chart.toolbar.logo = None
 
     output_file(filepath)
