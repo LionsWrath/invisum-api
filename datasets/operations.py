@@ -12,8 +12,8 @@ def args_dict(kwargs, possible):
 
 # dummy function
 def empty(dataframe, *args, **kwargs):
-    print dataframe
     print kwargs
+    print dataframe
     print dataframe.dtypes
 
     raise APIException(_("This operation does not exist."))
@@ -52,8 +52,6 @@ def sort(dataframe, *args, **kwargs):
     p_args = args_dict(kwargs, possible_arguments)
     
     return dataframe.sort(**p_args)
-
-
 
 # left, right, step
 # Use exceptions after

@@ -230,15 +230,36 @@ class PlotServe(APIView):
         f = file(fullpath)
         return f.read()
 
-    def get(self, request, pk):
+    def get_object(self, pk):
         try:
             plot = Plot.objects.get(pk=pk)
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
+
+        return plot
+
+    def get(self, request, pk):
+        plot = self.get_object(pk)
         content = self.readFile(plot.html.url)
 
         return Response(content)
 
+    def delete(self, request, pk):
+        plot = self.get_object(pk)
+        plot.html.delete(False)
+        plot.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class PlotList(generics.ListAPIView):
+    serializer_class = PlotSerializer
+
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Plot.objects.filter(owner=user)
+   
 class PlotCreate(generics.CreateAPIView):
     serializer_class = PlotSerializer
 
@@ -252,6 +273,7 @@ class PlotCreate(generics.CreateAPIView):
             "1" : plots.create_histogram,
             "2" : plots.create_bar,
             "3" : plots.create_line,
+            "4" : plots.create_scatter,
         }.get(op, operations.empty)
 
         try:
@@ -259,7 +281,10 @@ class PlotCreate(generics.CreateAPIView):
         except ObjectDoesNotExist:
             raise NotFound(_('Wrong value for dataset query.'))
 
-        filename = chart(dataset.to_dataframe(), **dict(self.request.data))
+        try:
+            filename = chart(dataset.to_dataframe(), **dict(self.request.data))
+        except:
+            raise APIException(_("Error on chart configuration."))
 
         instance.save(owner=self.request.user, html=filename)
 
