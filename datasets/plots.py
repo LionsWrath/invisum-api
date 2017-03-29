@@ -23,7 +23,7 @@ def args_dict(kwargs, possible):
 
 def create_histogram(dataframe, *args, **kwargs):
     filepath = generate_path()
-    possible_arguments = base_arguments + {}
+    possible_arguments = base_arguments + {'values', 'label', 'agg', 'bins', 'density'}
 
     p_args = args_dict(kwargs, possible_arguments)
 

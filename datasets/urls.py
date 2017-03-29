@@ -29,21 +29,22 @@ urlpatterns = format_suffix_patterns([
     url(r'^discover/$', views.DiscoverFeed.as_view(), name='discover-feed'),
 
     # Operations
-    url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view()),
+    url(r'^personal/operation/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PersonalOperation.as_view(), 
+        name='dataset-operation'),
     url(r'^personal/operation/(?P<op>[0-9]+)/(?P<l_pk>[0-9]+)-(?P<r_pk>[0-9]+)/$', 
-        views.PersonalMultisetOperation.as_view()),
+        views.PersonalMultisetOperation.as_view(), name='multiset-operation'),
 
     # Plot
-    url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotCreate.as_view()),
-    url(r'^personal/plot/$', views.PlotList.as_view()),
+    url(r'^personal/plot/(?P<op>[0-9]+)/(?P<pk>[0-9]+)/$', views.PlotCreate.as_view(), name='plot-create'),
+    url(r'^personal/plot/$', views.PlotList.as_view(), name='plot-list'),
 
     # Metadata
-    url(r'^personal/(?P<pk>[0-9]+)/meta/$', views.PersonalMeta.as_view()),
+    url(r'^personal/(?P<pk>[0-9]+)/meta/$', views.PersonalMeta.as_view(), name='personal-meta'),
 ])
 
 urlpatterns += [ 
     # Serve a plot
-    url(r'^personal/plot/(?P<pk>[0-9]+)/$', views.PlotServe.as_view()),
+    url(r'^personal/plot/(?P<pk>[0-9]+)/$', views.PlotServe.as_view(), name='plot-serve'),
     
     # Change this to follow MEDIA_URL
     url(r'^media/(?P<pk>[0-9]+)/$', views.DatasetServeById.as_view(), name='media-dataset'),

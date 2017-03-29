@@ -33,7 +33,7 @@ def fillna(dataframe, *args, **kwargs):
     return dataframe.fillna(**p_args)
 
 def drop(dataframe, *args, **kwargs):
-    possible_arguments = {'labels'}
+    possible_arguments = {'labels', 'axis'}
 
     p_args = args_dict(kwargs, possible_arguments)
     
@@ -47,11 +47,11 @@ def filter(dataframe, *args, **kwargs):
     return dataframe.filter(**p_args)
 
 def sort(dataframe, *args, **kwargs):
-    possible_arguments = {'columns', 'ascending', 'axis', 'na_position'}
+    possible_arguments = {'by', 'ascending', 'axis', 'na_position'}
 
     p_args = args_dict(kwargs, possible_arguments)
     
-    return dataframe.sort(**p_args)
+    return dataframe.sort_values(**p_args)
 
 # left, right, step
 # Use exceptions after

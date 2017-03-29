@@ -81,7 +81,7 @@ class DatasetList(generics.ListCreateAPIView):
     queryset = Dataset.objects.all()
     serializer_class = DatasetSerializer
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     # Associate a User to the Dataset - POST
     def perform_create(self, instance):
@@ -302,7 +302,7 @@ class RatingList(generics.ListCreateAPIView):
     serializer_class = RatingSerializer
 
     # Check this permissions - is read only permitted?
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
    
     def get_queryset(self):
         dataset = self.kwargs['dataset']
@@ -328,4 +328,4 @@ class RatingDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
 
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
