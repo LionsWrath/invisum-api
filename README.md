@@ -123,33 +123,33 @@ To run:
 
 ## Single Dataset Operations
 
-- Slice
+1. Slice
     + Simple pythonic slice.
     + **Arguments**: left, right, step
-- Drop
+2. Drop
     + Drop columns/rows based on labels.
     + **Arguments**: labels, axis
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.drop.html)
-- Filter
+3. Filter
     + Subset of columns/rows based only on labels.
     + **Arguments**: items, like, regex, axis
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.filter.html) 
-- Fillna
+4. Fillna
     + Fill non existent values.
     + **Arguments**: value
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.fillna.html)
-- Dropna
+5. Dropna
     + Drop columns/rows with non existent values.
     + **Arguments**: how
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.dropna.html)
-- Sort
+6. Sort
     + Sort values.
     + **Arguments**: by, ascending, axis, na\_position
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_values.html)
 
 ## Multi Dataset Operations
 
-- Merge
+1. Merge
     + Merge two personal datasets.
     + **Arguments**: how, on, left\_on, right\_on, right\_index, sort, suffixes, copy, indicator
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.merge.html)
@@ -166,11 +166,11 @@ To run:
 
 ### Chart Configuration
 
-- Histogram
+1. Histogram
     + **Arguments**: values, label, agg, bins, density
-- Bar
+2. Bar
     + **Arguments**: values, label
-- Line
+3. Line
     + **Arguments**: x, y
-- Scatter
+4. Scatter
     + **Arguments**: x, y
