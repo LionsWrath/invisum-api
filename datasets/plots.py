@@ -7,6 +7,8 @@ import uuid
 htmlpath = path.join(settings.MEDIA_ROOT, 'html')
 tools = "pan,wheel_zoom,box_zoom,save,reset"
 
+base_arguments  = {'plot_width', 'plot_height', 'legend'}
+
 def generate_path():
     filename = '.'.join([str(uuid.uuid4()), "html"])
     filepath = path.join(htmlpath, filename)
@@ -21,7 +23,7 @@ def args_dict(kwargs, possible):
 
 def create_histogram(dataframe, *args, **kwargs):
     filepath = generate_path()
-    possible_arguments = {}
+    possible_arguments = base_arguments + {}
 
     p_args = args_dict(kwargs, possible_arguments)
 
@@ -35,7 +37,7 @@ def create_histogram(dataframe, *args, **kwargs):
 
 def create_bar(dataframe, *args, **kwargs):
     filepath = generate_path()
-    possible_arguments = {'values', 'label', 'plot_width', 'plot_height', 'legend'}
+    possible_arguments = base_arguments + {'values', 'label'}
 
     p_args = args_dict(kwargs, possible_arguments)
 
@@ -49,7 +51,7 @@ def create_bar(dataframe, *args, **kwargs):
 
 def create_line(dataframe, *args, **kwargs):
     filepath = generate_path()
-    possible_arguments = {'x', 'y'}
+    possible_arguments = base_arguments + {'x', 'y'}
 
     p_args = args_dict(kwargs, possible_arguments)
 
@@ -65,7 +67,7 @@ def create_line(dataframe, *args, **kwargs):
 
 def create_scatter(dataframe, *args, **kwargs):
     filepath = generate_path()
-    possible_arguments = {'x', 'y'}
+    possible_arguments = base_arguments + {'x', 'y'}
 
     p_args = args_dict(kwargs, possible_arguments)
 
