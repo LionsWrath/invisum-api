@@ -284,7 +284,7 @@ class PlotCreate(generics.CreateAPIView):
         try:
             filename = chart(dataset.to_dataframe(), **dict(self.request.data))
         except:
-            raise APIException(_("Error on chart configuration."))
+            raise #APIException(_("Error on chart configuration."))
 
         instance.save(owner=self.request.user, html=filename)
 

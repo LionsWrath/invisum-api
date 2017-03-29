@@ -67,7 +67,7 @@ class PersonalDataset(models.Model):
         return pd.DataFrame(records)
 
     def process_csv(self, url):
-        return pd.read_csv(url)
+        return pd.read_csv(url, encoding='utf-8')
 
     def process_excel(self, url):
         return pd.read_excel(url)
