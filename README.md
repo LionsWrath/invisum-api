@@ -41,13 +41,13 @@ To run:
     + **Permissions**: IsAuthenticatedOrReadOnly
     + **GET**: List all datasets.
     + **POST**: Create new dataset.
-- datasets/<id>/
+- datasets/\<id>/
     + **Name**: dataset-detail
     + **Permissions**: IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly
     + **GET**: Information about <id> dataset.
     + **PUT/PATCH**: Update <id> dataset.
     + **DELETE**: Delete the <id> dataset.
-- datasets/personal/<id>/
+- datasets/personal/\<id>/
     + **Name**: personal-create
     + **Permissions**: IsAuthenticated, IsOwnerOrReadOnly 
     + **GET**: List all personal datasets related to <id> and the user.
@@ -56,7 +56,7 @@ To run:
     + **Name**: personal-list
     + **Permissions**: IsAuthenticated, IsOwnerOrReadOnly 
     + **GET**: List all personal datasets related to the user.
-- personal/<id>/
+- personal/\<id>/
     + **Name**: personal-detail
     + **Permissions**: IsAuthenticated, IsOwnerOrReadOnly
     + **GET**: Information about <id> personal dataset.
