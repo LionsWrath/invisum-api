@@ -153,6 +153,11 @@ To run:
     + Merge two personal datasets.
     + **Arguments**: how, on, left\_on, right\_on, right\_index, sort, suffixes, copy, indicator
     + [Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.merge.html)
+2. Closest Match Merge*(Testing)*
+    + Merge two personal datasets based on the closest match.
+    + **Arguments**: left\_pivot, right\_pivot, how, on, left\_on, right\_on, right\_index, sort, suffixes, copy, indicator
+    + [Merge Reference](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.merge.html)
+    + [Closest Match Reference](https://docs.python.org/2/library/difflib.html#difflib.get_close_matches)
 
 ## Charts
 
