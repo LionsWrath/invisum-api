@@ -33,7 +33,7 @@ class Dataset(models.Model):
     about = models.TextField(blank=True)
 
     data = models.FileField(storage=file_storage, upload_to=update_filename)    
-    extension = models.IntegerField(choices=EXTENSION_CHOICES, default='CSV')
+    extension = models.IntegerField(choices=EXTENSION_CHOICES, default=1)
 
     @property
     def rating(self): 
@@ -60,7 +60,7 @@ class PersonalDataset(models.Model):
     owner = models.ForeignKey('auth.User', related_name='personal', on_delete=models.CASCADE)
 
     personal_data = models.FileField(storage=personal_storage, editable=False)    
-    extension = models.IntegerField(choices=EXTENSION_CHOICES, default='CSV', editable=False)
+    extension = models.IntegerField(choices=EXTENSION_CHOICES, default=1, editable=False)
 
     def process_json(self, url):
         records = [json.loads(line) for line in open(url)]

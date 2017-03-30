@@ -2,6 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import APIException
 import pandas as pd
+import difflib
 
 def args_dict(kwargs, possible):
     args = {}
@@ -86,8 +87,30 @@ def slice(dataframe, *args, **kwargs):
 # Move this to another file
 
 def merge(left_dataframe, right_dataframe, *args, **kwargs):
-    possible_arguments = {'how', 'on', 'left_on', 'right_on', 'left_index', 'right_index', 'sort', 'suffixes', 'copy', 'indicator'}
+    possible_arguments = {'how', 'on', 'left_on', 'right_on', 'left_index', 'right_index', 
+            'sort', 'suffixes', 'copy', 'indicator'}
 
     p_args = args_dict(kwargs, possible_arguments)
     
+    return left_dataframe.merge(right_dataframe, **p_args)
+
+def closest_match_merge(left_dataframe, right_dataframe, *args, **kwargs):
+    if 'left_pivot' in kwargs:
+        left_pivot = kwargs['left_pivot']
+    else:
+        raise ParseError(_("Missing value left_pivot for closest match merge."))
+
+    if 'right_pivot' in kwargs:
+        right_pivot = kwargs['right_pivot']
+    else:
+        raise ParseError(_("Missing value right_pivot for closest match merge."))
+
+    possible_arguments = {'how', 'on', 'left_on', 'right_on', 'left_index', 'right_index', 
+            'sort', 'suffixes', 'copy', 'indicator'}
+
+    p_args = args_dict(kwargs, possible_arguments)
+
+    right_dataframe[right_pivot] = right_dataframe[right_pivot].apply(
+            lambda x: difflib.get_close_matches(x, left_dataframe[left_pivot])[0])
+
     return left_dataframe.merge(right_dataframe, **p_args)

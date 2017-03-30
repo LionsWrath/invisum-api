@@ -184,6 +184,7 @@ class PersonalMultisetOperation(APIView):
 
         operation = {
             "1" : operations.merge,
+            "2" : operations.closest_match_merge,
         }.get(op, operations.empty)
 
         try:
@@ -197,14 +198,15 @@ class PersonalMultisetOperation(APIView):
         except APIException:
             raise
         except:
-            #Change this exception later - maybe a custom one
-            raise APIException(_("Incorrect values on operation.")) 
+            raise #APIException(_("Incorrect values on operation.")) 
         
         new_file = ContentFile("")
         new_file.name = '.'.join([str(uuid.uuid4()), l_dataset.get_extension_display().lower()])
 
         # Change original to originals(MTM)
-        new_personal = PersonalDataset(owner=user, original=l_dataset.original, personal_data=new_file)
+        new_personal = PersonalDataset(owner=user, original=l_dataset.original, 
+                personal_data=new_file, extension=l_dataset.extension)
+        
         new_personal.save()
         new_personal.update_file(result)
 
