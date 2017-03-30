@@ -78,8 +78,11 @@ Makefile.in
 datasets/migrations/
 db.*
 media/*
-media/personal/*
 !media/.gitkeep
+!media/personal
+!media/html
+media/personal/*
+media/html/*
 !media/personal/.gitkeep
 !media/html/.gitkeep
 !media/test

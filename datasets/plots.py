@@ -55,7 +55,7 @@ def create_line(dataframe, *args, **kwargs):
 
     p_args = args_dict(kwargs, possible_arguments)
 
-    print dataframe.stack()
+    dataframe.stack()
 
     chart = Line(dataframe, toolbar_location="above", tools=tools, responsive=True, **p_args)
     chart.toolbar.logo = None
