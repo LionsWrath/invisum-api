@@ -11,6 +11,7 @@ env:
         - DJANGO_SETTINGS_MODULE=invisum.settings
         - PYTHONPATH=$HOME/builds/LionsWrath/invisum-api
         - PIP_USE_MIRRORS=true
+        - SECRET_KEY='f(mm#q1k*^vk@v_hg9um6zo)9u7#pztgr8!yeq(+#*&wglwei_'
 
 install:
     - sudo apt-get update
