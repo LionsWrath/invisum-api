@@ -59,8 +59,6 @@ class UserTest(BaseTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(content), 2)
-        self.assertEqual(content[0]['username'], 'john')
-        self.assertEqual(content[1]['username'], 'jair')
 
     def test_retrieve(self):
         id = User.objects.all()[0].id
@@ -78,8 +76,6 @@ class UserTest(BaseTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(content), 2)
-        self.assertEqual(content[0]['username'], 'john')
-        self.assertEqual(content[1]['username'], 'jair')
 
     def test_retrieve_logged(self):
         id = User.objects.all()[0].id
