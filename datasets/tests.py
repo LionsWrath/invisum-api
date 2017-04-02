@@ -2,14 +2,13 @@ from datasets.models import Dataset, PersonalDataset, Rating
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.reverse import reverse
+from rest_framework_jwt import utils
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.conf import settings
+from unittest import skip
 from os import path
 import json
-
-# Testing
-from unittest import skip
 
 files_url = path.join(settings.MEDIA_ROOT, 'test')
 
@@ -18,7 +17,7 @@ files_url = path.join(settings.MEDIA_ROOT, 'test')
 def readFile(filename):
     datapath = path.join(files_url, filename)
     f = file(datapath)
-    return SimpleUploadedFile(f.name, f.read())
+    return SimpleUploadedFile(f.name, f.read(), content_type='multipart/form-data')
 
 def create_dataset(title, about, filename, extension):
     return {
@@ -28,30 +27,37 @@ def create_dataset(title, about, filename, extension):
         "extension": extension
     }   
 
-def cleanDatasets():
-    datasets = Dataset.objects.all()
-    for data in datasets:
-        data.data.delete(False)
-    datasets.delete()
-
-def cleanPersonalDatasets():
-    personals = PersonalDataset.objects.all()
-    for data in personals:
-        data.personal_data.delete(False)
-    personals.delete()
-
 class BaseTestCase(APITestCase):
-    def setUp(self):
-        super(BaseTestCase, self).setUpClass()
-        User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
-        User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
+    def make_login(self, username, password):
+        return self.client.login(username=username, password=password) 
 
-# LIST, RETRIEVE
-#@skip("Don't want to test")
+    def make_jwt_login(self, user):
+        payload = utils.jwt_payload_handler(user)
+        return utils.jwt_encode_handler(payload)
+
+    def create_header(self, token):
+        return 'JWT {0}'.format(token)
+
+    def create_authorization(self, user):
+        token = self.make_jwt_login(user)
+        return { 'HTTP_AUTHORIZATION': self.create_header(token) }
+
+    def setUp(self):
+        self.user_1 = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
+        self.user_2 = User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
+
 class UserTest(BaseTestCase):
     def test_login(self):
-        login = self.client.login(username='john', password='johnpassword') 
+        login = self.make_login('john', 'johnpassword') 
         self.assertTrue(login) 
+
+    def test_login_jwt(self):
+	data = {
+	    'username': 'john',
+	    'password': 'johnpassword'
+	}
+	response = self.client.post(reverse('jwt_login'), data)
+	self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_list(self):
         response = self.client.get(reverse('user-list'), format='json')
@@ -70,7 +76,7 @@ class UserTest(BaseTestCase):
         self.assertEqual(content['username'], name)
 
     def test_list_logged(self):
-        self.client.login(username='john', password='johnpassword') 
+        self.make_login('john', 'johnpassword') 
         response = self.client.get(reverse('user-list'), format='json')
         content = json.loads(response.content)
 
@@ -81,143 +87,104 @@ class UserTest(BaseTestCase):
         id = User.objects.all()[0].id
         name = User.objects.all()[0].username
 
-        self.client.login(username='john', password='johnpassword')  
+        self.make_login('john', 'johnpassword')  
         response = self.client.get(reverse('user-detail', args=[id]))
         content = json.loads(response.content)
 
         self.assertEqual(content['username'], name)
 
-# POST, DELETE
-@skip("Don't want to test")
-class DatasetTest(APITestCase):
-    def tearDown(self):
-        cleanDatasets()
-
-    def test_dataset_create_1(self):
+class DatasetTestCreate(BaseTestCase):
+    def test_dataset_create_jwt(self):
         dataset_2 = create_dataset("TimeSeries", "tseries", "tseries_test.csv", 1)
         
-        self.client.login(username='jair', password='jairpassword')
-        response = self.client.post(reverse('dataset-list'), dataset_2)
+        auth = self.create_authorization(self.user_1)
+        
+        response = self.client.post(reverse('dataset-list'), dataset_2, **auth)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        Dataset.objects.all().delete()
 
-    def test_dataset_create_2(self):
+    def test_dataset_create_normal(self):
         dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
  
-        self.client.login(username='john', password='johnpassword')
+        self.make_login('john', 'johnpassword')
         response = self.client.post(reverse('dataset-list'), dataset_1)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        Dataset.objects.all().delete()
 
-    def test_dataset_delete_1(self):
+class DatasetTestDelete(BaseTestCase):
+    def setUp(self):
+        super(DatasetTestDelete, self).setUp()
         dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
  
-        self.client.login(username='john', password='johnpassword')
-        self.client.post(reverse('dataset-list'), dataset_1)
+        auth = self.create_authorization(self.user_1)
+        self.client.post(reverse('dataset-list'), dataset_1, **auth)
+        self.id = Dataset.objects.all()[0].id
 
-        self.assertEqual(Dataset.objects.count(), 1)
-        id = Dataset.objects.all()[0].id
+    def test_dataset_delete_success(self):
+        auth = self.create_authorization(self.user_1)
 
-        response = self.client.delete(reverse('dataset-detail', args=[id]))
+        response = self.client.delete(reverse('dataset-detail', args=[self.id]), **auth)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
  
-    def test_dataset_delete_2(self):
+    def test_dataset_delete_fail(self):
+        auth = self.create_authorization(self.user_2)
 
-        dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
-        
-        self.client.login(username='john', password='johnpassword')
-        self.client.post(reverse('dataset-list'), dataset_1)
-        self.client.logout()
-
-        self.assertEqual(Dataset.objects.count(), 1)
-        id = Dataset.objects.all()[0].id
-
-        self.client.login(username='jair', password='jairpassword')
-        response = self.client.delete(reverse('dataset-detail', args=[id]))
+        response = self.client.delete(reverse('dataset-detail', args=[self.id]), **auth)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-# POST, DELETE
-@skip("Don't want to test")
-class PersonalDatasetTest(APITestCase):
-    @classmethod
-    def setUpClass(self):
-        super(PersonalDatasetTest, self).setUpClass()
-        User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
-        User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
-
+class PersonalDatasetBaseTest(BaseTestCase):
     def setUp(self):
+        super(PersonalDatasetBaseTest, self).setUp()
 
         dataset_1 = create_dataset("Bitly", "", "usagov_test.txt", 2)
         dataset_2 = create_dataset("TimeSeries", "tseries", "tseries_test.csv", 1)
                
-        self.client.login(username='jair', password='jairpassword')
+        self.make_login('jair', 'jairpassword')
         self.client.post(reverse('dataset-list'), dataset_2)
         self.client.logout()
 
-        self.client.login(username='john', password='johnpassword')
+        self.make_login('john', 'johnpassword')
         self.client.post(reverse('dataset-list'), dataset_1)
         self.client.logout()
 
-    def tearDown(self):
-        cleanPersonalDatasets()
-        cleanDatasets()
+        self.data = { "description": "pdataset" }
+        
+        self.id_1 = Dataset.objects.all()[0].id
+        self.id_2 = Dataset.objects.all()[1].id
 
-    def test_personal_create_1(self):
-        data = { "description": "pdataset" }
-
-        self.assertEqual(Dataset.objects.count(), 2)
-        id = Dataset.objects.all()[0].id
-
-        self.client.login(username='john', password='johnpassword')
-        response = self.client.post(reverse('personal-create', args=[id]), data)
+class PersonalDatasetTestCreate(PersonalDatasetBaseTest):
+    def test_personal_create_jwt(self):
+        auth = self.create_authorization(self.user_1)
+        
+        response = self.client.post(reverse('personal-create', args=[self.id_1]), self.data, **auth)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
  
-    def test_personal_create_2(self):
-        data = { "description": "pdataset" }
+    def test_personal_create_normal(self):
+        self.make_login('jair', 'jairpassword')
 
-        self.assertEqual(Dataset.objects.count(), 2)
-        id = Dataset.objects.all()[1].id
-
-        self.client.login(username='jair', password='jairpassword')
-        response = self.client.post(reverse('personal-create', args=[id]), data)
+        response = self.client.post(reverse('personal-create', args=[self.id_2]), self.data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    # A user try to delete a PersonalDataset
-    def test_personal_delete_1(self):
-        data = { "description": "pdataset" }
+class PersonalDatasetTestDelete(PersonalDatasetBaseTest):
+    def setUp(self):
+        super(PersonalDatasetTestDelete, self).setUp()
 
-        self.assertEqual(Dataset.objects.count(), 2)
-        id = Dataset.objects.all()[0].id
+        auth = self.create_authorization(self.user_1)
+        request = self.client.post(reverse('personal-create', args=[self.id_1]), self.data, **auth)
+        self.id = PersonalDataset.objects.all()[0].id
 
-        self.client.login(username='jair', password='jairpassword')
-        self.client.post(reverse('personal-create', args=[id]), data)
-        
-        self.assertEqual(PersonalDataset.objects.count(), 1)
-        id = PersonalDataset.objects.all()[0].id
+    def test_personal_delete_success(self):
+        self.make_login('john', 'johnpassword')
 
-        response = self.client.delete(reverse('personal-detail', args=[id])) 
+        response = self.client.delete(reverse('personal-detail', args=[self.id])) 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
  
-    # Another user try to delete a PersonalDataset
     def test_personal_delete_2(self):
-        data = { "description": "pdataset" }
+        self.make_login('jair', 'jairpassword')
 
-        self.assertEqual(Dataset.objects.count(), 2)
-        id = Dataset.objects.all()[0].id
-
-        self.client.login(username='jair', password='jairpassword')
-        self.client.post(reverse('personal-create', args=[id]), data)
-        self.client.logout()
-        
-        self.assertEqual(PersonalDataset.objects.count(), 1)
-        id = PersonalDataset.objects.all()[0].id
-
-        self.client.login(username='john', password='johnpassword')
-        response = self.client.delete(reverse('personal-detail', args=[id])) 
+        response = self.client.delete(reverse('personal-detail', args=[self.id])) 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 class RatingTest(APITestCase):
