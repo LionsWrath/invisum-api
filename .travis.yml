@@ -32,7 +32,7 @@ install:
     - pip install -q mysql-python
 
 before_script:
-    - psql -c 'create database travis_ci_test;' -U postgres
+    - psql -c 'create database travisdb;' -U postgres
 
 script:
     - python manage.py makemigrations datasets
