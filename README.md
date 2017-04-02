@@ -4,7 +4,9 @@
 
 API for the In Visum service demo.
 
-Try aliasing all anaconda stuff to get easier access:
+## Install
+
+We are using the [Continuum Analytics](https://www.continuum.io/) **Anaconda** platform for the necessary data science tools. You can try aliasing all anaconda stuff to get easier access:
 	
 	$ cd ~/anaconda2/bin
 	$ for i in *; do alias "ana-$i"="$(pwd -P)/$i"; done
@@ -16,12 +18,15 @@ Install depedencies with:
 To setup the first time:
 	
 	$ ana-python manage.py makemigrations datasets
-	
 	$ ana-python manage.py migrate
 
 To run:	
 	
 	$ ana-python manage.py runserver
+
+## Configuration
+
+Please set a **SECRET\_KEY** in your environment variables before executing. If you need to generate a new key, you can use online tools like [this](http://www.miniwebtool.com/django-secret-key-generator/).
 
 ***
 
