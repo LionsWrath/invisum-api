@@ -11,6 +11,7 @@ env:
         - DJANGO_SETTINGS_MODULE=invisum.settings
         - PYTHONPATH=$HOME/builds/LionsWrath/invisum-api
         - PIP_USE_MIRRORS=true
+        - SECRET_KEY='f(mm#q1k*^vk@v_hg9um6zo)9u7#pztgr8!yeq(+#*&wglwei_'
 
 install:
     - sudo apt-get update
@@ -31,7 +32,7 @@ install:
     - pip install -q mysql-python
 
 before_script:
-    - mysql -e 'CREATE DATABASE IF NOT EXISTS travisdb;'
+    - psql -c 'create database travis_ci_test;' -U postgres
 
 script:
     - python manage.py makemigrations datasets

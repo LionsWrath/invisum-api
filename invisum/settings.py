@@ -19,22 +19,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'f(mm#q1k*^vk@v_hg9um6zo)9u7#pztgr8!yeq(+#*&wglwei_'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Testing this configurations---------------------------
-
 # Allow all origins
 CORS_ORIGIN_ALLOW_ALL = True
 
 # Allow cookies
 CORS_ALLOW_CREDENTIALS = True
-
-#-------------------------------------------------------
 
 # Redirect after login
 LOGIN_REDIRECT_URL = '/discover/'
@@ -50,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'datasets.apps.DatasetsConfig',
-    
     'corsheaders', 
 ]
 
@@ -62,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
     'corsheaders.middleware.CorsMiddleware',
 ]
 
@@ -91,15 +85,12 @@ WSGI_APPLICATION = 'invisum.wsgi.application'
 if 'TRAVIS' in os.environ:
     DATABASES = {
         'default': {
-            'ENGINE':   'django.db.backends.mysql',
+            'ENGINE':   'django.db.backends.postgresql_psycopg2',
             'NAME':     'travisdb',
             'USER':     'travis',
             'PASSWORD': '',
             'HOST':     'localhost',
             'PORT':     '',
-            'OPTIONS': {
-                'sql_mode': 'traditional',
-            },
         }
     }
 else:
@@ -150,13 +141,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
