@@ -52,31 +52,6 @@ class DatasetByUser(generics.ListAPIView):
         username = self.kwargs['username']
         return Dataset.objects.filter(owner__username__icontains=username)
 
-
-# Downloadable files for logged users by filename
-class DatasetServeByFilename(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request, filename):
-        response = Response(content_type='application/force-download')
-        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(filename)
-        response['X-Sendfile'] = smart_str(path.join(settings.MEDIA_ROOT, filename))
-        
-        return response
-
-# Downloadable files for logged users by dataset id
-class DatasetServeById(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def get(self, request, pk):
-        dataset = Dataset.objects.get(pk = pk)
-
-        response = Response(content_type='application/force-download')
-        response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(dataset.filename())
-        response['X-Sendfile'] = smart_str(dataset.data.url)
-        
-        return response
-
 class DatasetList(generics.ListCreateAPIView):
     queryset = Dataset.objects.all()
     serializer_class = DatasetSerializer

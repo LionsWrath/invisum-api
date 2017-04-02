@@ -45,8 +45,4 @@ urlpatterns = format_suffix_patterns([
 urlpatterns += [ 
     # Serve a plot
     url(r'^personal/plot/(?P<pk>[0-9]+)/$', views.PlotServe.as_view(), name='plot-serve'),
-    
-    # Change this to follow MEDIA_URL
-    url(r'^media/(?P<pk>[0-9]+)/$', views.DatasetServeById.as_view(), name='media-dataset'),
-    url(r'^media/(?P<filename>.+)/$', views.DatasetServeByFilename.as_view(), name='media-filename'),
 ]

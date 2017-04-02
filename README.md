@@ -119,12 +119,6 @@ Please set a **SECRET\_KEY** in your environment variables before executing. If 
     + **Permissions**: IsAuthenticated, IsOwnerOrReadOnly\*
     + **GET**: Serve the plot \<id> to the user.
     + **DELETE**: Delete the plot \<id>.
-- media/\<id>/
-    + **Name**: media-dataset
-    + **GET**: Serve the file related to dataset \<id>.
-- media/\<file>/
-    + **Name**: media-filename
-    + **GET**: Serve the file based on the name \<file>
 
 ## Single Dataset Operations
 
