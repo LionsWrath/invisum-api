@@ -27,6 +27,18 @@ def create_dataset(title, about, filename, extension):
         "extension": extension
     }   
 
+def cleanDatasets():
+    datasets = Dataset.objects.all()
+    for data in datasets:
+        data.data.delete(False)
+    datasets.delete()
+
+def cleanPersonalDatasets():
+    personals = PersonalDataset.objects.all()
+    for data in personals:
+        data.personal_data.delete(False)
+    personals.delete()
+
 class BaseTestCase(APITestCase):
     def make_login(self, username, password):
         return self.client.login(username=username, password=password) 
@@ -45,6 +57,10 @@ class BaseTestCase(APITestCase):
     def setUp(self):
         self.user_1 = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
         self.user_2 = User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
+
+    def tearDown(self):
+        cleanPersonalDatasets()
+        cleanDatasets()
 
 class UserTest(BaseTestCase):
     def test_login(self):
@@ -181,7 +197,7 @@ class PersonalDatasetTestDelete(PersonalDatasetBaseTest):
         response = self.client.delete(reverse('personal-detail', args=[self.id])) 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
  
-    def test_personal_delete_2(self):
+    def test_personal_delete_fail(self):
         self.make_login('jair', 'jairpassword')
 
         response = self.client.delete(reverse('personal-detail', args=[self.id])) 
