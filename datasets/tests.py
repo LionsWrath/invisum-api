@@ -40,15 +40,15 @@ def cleanPersonalDatasets():
         data.personal_data.delete(False)
     personals.delete()
 
-# LIST, RETRIEVE
-@skip("Don't want to test")
-class UserTest(APITestCase):
-    @classmethod
-    def setUpClass(self):
-        super(UserTest, self).setUpClass()
+class BaseTestCase(APITestCase):
+    def setUp(self):
+        super(BaseTestCase, self).setUpClass()
         User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
         User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
-    
+
+# LIST, RETRIEVE
+#@skip("Don't want to test")
+class UserTest(BaseTestCase):
     def test_login(self):
         login = self.client.login(username='john', password='johnpassword') 
         self.assertTrue(login) 
@@ -94,12 +94,6 @@ class UserTest(APITestCase):
 # POST, DELETE
 @skip("Don't want to test")
 class DatasetTest(APITestCase):
-    @classmethod
-    def setUpClass(self):
-        super(DatasetTest, self).setUpClass()
-        User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword') 
-        User.objects.create_user('jair', 'jair@dce.com', 'jairpassword')
-
     def tearDown(self):
         cleanDatasets()
 
