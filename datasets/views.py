@@ -154,6 +154,10 @@ class PersonalOperation(APIView):
 class PersonalMultisetOperation(APIView):
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly,)
 
+    def serialize_personal(self, personal):
+        serializer = PersonalDatasetSerializer(personal)
+        return serializer.data
+
     def post(self, request, op, l_pk, r_pk):
         user = request.user
 
@@ -185,7 +189,9 @@ class PersonalMultisetOperation(APIView):
         new_personal.save()
         new_personal.update_file(result)
 
-        return Response(status=status.HTTP_200_OK)
+        data = self.serialize_personal(new_personal)
+
+        return Response(data, status=status.HTTP_200_OK)
 
 class PersonalMeta(APIView):
     renderer_classes = (JSONRenderer,)
