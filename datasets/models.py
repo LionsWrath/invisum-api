@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models import Avg
 from django.db.models.functions import Coalesce
 from datasets.choices import EXTENSION_CHOICES, STAR_CONVERSION
+from rest_framework.exceptions import APIException
 from os import path
 import pandas as pd
 import json
@@ -62,17 +63,35 @@ class PersonalDataset(models.Model):
     personal_data = models.FileField(storage=personal_storage, editable=False)    
     extension = models.IntegerField(choices=EXTENSION_CHOICES, default=1, editable=False)
 
+    def substitute_accents(self, url):        
+        with open(url, 'r') as file:
+            text = file.read()
+
+        try:
+            result = unidecode(text.decode('utf8'))
+        except:
+            raise APIExcetion("Couldn't decode the dataset file to UTF-8.")
+
+        self.update_raw(text, url)
+
+    def pre_read(self, url):
+        self.substitute_accents(url)
+
     def process_json(self, url):
+        self.pre_read(url)
         records = [json.loads(line) for line in open(url)]
         return pd.DataFrame(records)
 
     def process_csv(self, url):
+        self.pre_read(url)
         return pd.read_csv(url, encoding='utf-8')
 
     def process_excel(self, url):
+        self.pre_read(url)
         return pd.read_excel(url)
 
     def process_table(self, url):
+        self. pre_read(url)
         return pd.read_table()
 
     def to_dataframe(self):
@@ -113,6 +132,12 @@ class PersonalDataset(models.Model):
         url = path.join(url, self.filename())
 
         method(dataframe, url)
+
+    def update_raw(self, text, url):
+        with open(url, "w") as file:
+            file.write(text)
+
+
 
     def filename(self):
         return path.basename(self.personal_data.name) 

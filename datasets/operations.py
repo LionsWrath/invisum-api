@@ -3,6 +3,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.exceptions import APIException
 import pandas as pd
 import difflib
+import unidecode
 
 def args_dict(kwargs, possible):
     args = {}
